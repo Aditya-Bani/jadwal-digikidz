@@ -507,7 +507,7 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
                                 <h3 className="text-xl font-black text-slate-900 tracking-tight">Activity Report</h3>
                              </div>
                              <div className="prose prose-slate max-w-none">
-                                <p className="text-slate-600 font-medium leading-relaxed whitespace-pre-line text-lg italic">
+                                <p className="text-slate-600 font-medium leading-relaxed whitespace-pre-line text-lg">
                                    <LinkifiedText text={selectedReport.activityReportText} />
                                 </p>
                              </div>
