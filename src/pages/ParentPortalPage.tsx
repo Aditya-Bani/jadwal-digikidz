@@ -4,12 +4,47 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { KeyRound, ArrowLeft, BookOpen, FolderOpen, User, Loader2, Sparkles, Megaphone, Link as LinkIcon, ExternalLink } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useCertificates } from '@/hooks/useCertificates';
+import { Label } from '@/components/ui/label';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Progress } from "@/components/ui/progress";
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { groupReportsByLevel } from '@/lib/levelUtils';
 import { EmptyState } from '@/components/EmptyState';
-import { useToast } from '@/hooks/use-toast';
-import { Label } from '@/components/ui/label';
+import {
+  KeyRound,
+  ArrowLeft,
+  BookOpen,
+  FolderOpen,
+  User,
+  Loader2,
+  Sparkles,
+  Megaphone,
+  Link as LinkIcon,
+  ExternalLink,
+  GraduationCap,
+  Download,
+  CheckCircle2,
+  FileText,
+  ChevronRight,
+  ChevronLeft,
+  PanelRightClose,
+  PanelRightOpen,
+  LayoutDashboard,
+  Menu,
+  PlayCircle
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -202,358 +237,490 @@ export default function ParentPortalPage() {
   );
 }
 
-// ─── WeekCard ──────────────────────────────────────────────────────────────────
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex gap-2 text-sm">
-      <span className="font-bold text-foreground w-20 shrink-0">{label}</span>
-      <span className="text-muted-foreground">:</span>
-      <span className="text-foreground">{value}</span>
-    </div>
-  );
-}
-
-function WeekCard({ report, onClick }: { report: ActivityReport; onClick: (r: ActivityReport) => void }) {
-  return (
-    <div className="w-[200px] sm:w-[220px] shrink-0">
-      <button
-        onClick={() => onClick(report)}
-        className="w-full p-4 rounded-2xl border border-border/50 bg-background/50 hover:bg-primary/10 hover:border-primary/30 transition-all text-left space-y-2 group shadow-sm hover:shadow-md"
-      >
-
-        <div className="flex justify-between items-start">
-          <p className="font-black text-sm text-foreground group-hover:text-primary transition-colors">Week {report.lessonWeek}</p>
-          <Sparkles className="h-3 w-3 text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </div>
-        <p className="text-xs font-semibold text-muted-foreground line-clamp-2 leading-relaxed">{report.lessonName}</p>
-        <div className="pt-2 border-t border-border/30">
-          <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest">
-            {new Date(report.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </p>
-        </div>
-      </button>
-    </div>
-  );
-}
-
-
-// ─── WeekRow ───────────────────────────────────────────────────────────────────
-
-function WeekRow({ label, reports, onReportClick }: { label: string; reports: ActivityReport[]; onReportClick: (r: ActivityReport) => void }) {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{label}</p>
-      </div>
-      <ScrollArea className="w-full">
-        <div className="flex flex-row gap-4 pb-4">
-
-          {reports.length > 0 ? (
-            reports.map((r) => <WeekCard key={r.id} report={r} onClick={onReportClick} />)
-          ) : (
-            <div className="w-full text-center py-8 border border-dashed border-border/50 rounded-3xl bg-muted/20">
-              <p className="text-xs text-muted-foreground italic">Belum ada report untuk periode ini</p>
-            </div>
-          )}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-    </div>
-  );
-}
-
 
 // ─── ParentReportView ──────────────────────────────────────────────────────────
 
 function ParentReportView({ studentName, accessCode, onBack }: { studentName: string; accessCode: string; onBack: () => void }) {
   const { reports, loading } = useActivityReports(studentName, accessCode);
+  const { certificates, loading: certsLoading } = useCertificates(studentName);
 
+  const [viewMode, setViewMode] = useState<'dashboard' | 'player'>('dashboard');
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [selectedReport, setSelectedReport] = useState<ActivityReport | null>(null);
+  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   const levels = groupReportsByLevel(reports);
 
-  return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none opacity-40">
-        <div className="absolute top-[-5%] left-[-5%] w-[30%] h-[30%] bg-primary/20 rounded-full blur-[100px]" />
-        <div className="absolute bottom-[-5%] right-[-5%] w-[30%] h-[30%] bg-accent/20 rounded-full blur-[100px]" />
-      </div>
+  // Helper to get certificate for a level
+  const getCertForLevel = (levelNumber: number) => {
+    return certificates.find(cert => {
+      let certJenjang = cert.level;
+      try {
+        const parsed = JSON.parse(cert.level);
+        certJenjang = parsed.jenjang || parsed.level || cert.level;
+      } catch (e) {}
+      const matchResult = certJenjang.match(/\d+/);
+      const certLevelNumber = matchResult ? parseInt(matchResult[0], 10) : null;
+      return certLevelNumber === levelNumber;
+    });
+  };
 
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border shadow-sm">
-        <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight truncate">{studentName}</h2>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="flex h-1.5 w-1.5 shrink-0 rounded-full bg-primary animate-pulse" />
-              <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground truncate">
-                Activity Report History
-              </p>
+  const handleStartLevel = (level: number) => {
+    setSelectedLevel(level);
+    setViewMode('player');
+    
+    // Auto-select first report if available
+    const lvlData = levels.find(l => l.level === level);
+    if (lvlData) {
+      const firstReport = lvlData.halfA[0] || lvlData.halfB[0];
+      if (firstReport) setSelectedReport(firstReport);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center py-24 gap-4">
+        <div className="relative">
+          <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-110 animate-pulse" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary relative" />
+        </div>
+        <p className="font-bold text-muted-foreground animate-pulse tracking-widest text-xs uppercase">Menyambungkan ke Portal...</p>
+      </div>
+    );
+  }
+
+  if (viewMode === 'dashboard') {
+    return (
+      <div className="min-h-screen bg-slate-50/50 relative overflow-hidden">
+        {/* Decorative Background Elements */}
+        <div className="fixed top-0 left-0 w-full h-full pointer-events-none opacity-40">
+          <div className="absolute top-[-5%] left-[-5%] w-[30%] h-[30%] bg-primary/10 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[-5%] right-[-5%] w-[30%] h-[30%] bg-accent/10 rounded-full blur-[100px]" />
+        </div>
+
+        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+               <div className="bg-primary/10 p-2 rounded-xl">
+                  <LayoutDashboard className="w-5 h-5 text-primary" />
+               </div>
+               <div>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none">{studentName}</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Dashboard Belajar</p>
+               </div>
             </div>
+            <img src={logodk} alt="DIGIKIDZ" className="h-8 shrink-0 object-contain" />
           </div>
-          <img src={logodk} alt="DIGIKIDZ" className="h-8 sm:h-10 lg:h-12 shrink-0 object-contain" />
+        </header>
+
+        <main className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
+          <div className="mb-10 text-center sm:text-left">
+             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Aktivitas Belajar</h1>
+             <p className="text-slate-500 font-medium mt-1">Pantau perkembangan dan raih sertifikat belajarmu.</p>
+          </div>
+
+          <div className="space-y-4">
+             {levels.length === 0 ? (
+               <EmptyState 
+                  title="Belum Ada Aktivitas" 
+                  description="Hubungi Coach jika Anda merasa ini adalah kesalahan."
+               />
+             ) : levels.map((lvl) => {
+               const cert = getCertForLevel(lvl.level);
+               const isCompleted = !!cert;
+               
+               return (
+                 <div key={lvl.level} className="group bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                       <div className="flex items-start gap-4">
+                          <div className={`mt-1 p-2 rounded-lg ${isCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                             {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />}
+                          </div>
+                          <div>
+                             <div className="flex items-center gap-2 mb-1">
+                                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                   {isCompleted ? 'Telah diselesaikan' : 'Sedang dipelajari'}
+                                </span>
+                             </div>
+                             <h3 className="text-xl font-bold text-slate-900">Level {lvl.level} - Kurikulum Pembelajaran</h3>
+                             <p className="text-sm text-slate-500 font-medium mt-1">Berisi laporan aktivitas mingguan dari Week {lvl.start} - {lvl.end}.</p>
+                          </div>
+                       </div>
+                       
+                       <div className="flex flex-col sm:flex-row gap-3">
+                          {isCompleted && (
+                             <Button 
+                               onClick={() => setSelectedCertificate(cert)} 
+                               variant="outline" 
+                               className="rounded-xl border-slate-200 font-bold gap-2 text-slate-600 h-11"
+                             >
+                                <FileText className="w-4 h-4" /> Lihat Sertifikat
+                             </Button>
+                          )}
+                          <Button 
+                            onClick={() => handleStartLevel(lvl.level)}
+                            className={`rounded-xl font-bold gap-2 h-11 px-8 ${isCompleted ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-primary text-white shadow-lg shadow-primary/20'}`}
+                          >
+                             {isCompleted ? 'Cek Activity Report' : 'Lanjutkan Belajar'} <ChevronRight className="w-4 h-4" />
+                          </Button>
+                       </div>
+                    </div>
+                 </div>
+               );
+             })}
+          </div>
+        </main>
+
+        {/* Floating Logout Button */}
+        <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40">
+           <AlertDialog>
+             <AlertDialogTrigger asChild>
+               <Button variant="default" size="lg" className="rounded-full h-14 w-14 sm:w-auto px-0 sm:px-6 shadow-2xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold transition-all group">
+                 <LogOut className="h-5 w-5 sm:mr-2" />
+                 <span className="hidden sm:inline">Keluar</span>
+               </Button>
+             </AlertDialogTrigger>
+             <AlertDialogContent className="rounded-3xl p-8 max-w-md bg-white border-none shadow-2xl">
+                <AlertDialogHeader className="space-y-4">
+                  <div className="mx-auto bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center">
+                    <LogOut className="h-8 w-8 text-slate-400" />
+                  </div>
+                  <AlertDialogTitle className="text-2xl font-black text-center">Keluar Portal?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-center font-medium text-slate-500">
+                    Anda perlu memasukkan kode akses kembali untuk masuk.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="mt-8 flex gap-3">
+                  <AlertDialogCancel className="flex-1 rounded-xl h-12 font-bold bg-slate-100 border-none">Batal</AlertDialogCancel>
+                  <AlertDialogAction onClick={onBack} className="flex-1 rounded-xl h-12 font-bold bg-primary text-white border-none shadow-lg shadow-primary/20">Ya, Keluar</AlertDialogAction>
+                </AlertDialogFooter>
+             </AlertDialogContent>
+           </AlertDialog>
+        </div>
+
+        {/* Sertifikat Modal */}
+        <Dialog open={!!selectedCertificate} onOpenChange={(open) => !open && setSelectedCertificate(null)}>
+          <DialogContent className="max-w-5xl p-0 overflow-hidden rounded-[2rem] bg-slate-50 border-none shadow-3xl w-[94vw] sm:w-full">
+             {selectedCertificate && (
+               <div className="flex flex-col items-center gap-4 p-4 sm:p-10">
+                  <div className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl bg-white ring-1 ring-slate-200">
+                     {selectedCertificate.fileUrl.toLowerCase().endsWith('.pdf') ? (
+                        <iframe 
+                          src={`https://docs.google.com/viewer?url=${encodeURIComponent(selectedCertificate.fileUrl)}&embedded=true`} 
+                          className="w-full h-[70vh] sm:h-auto sm:aspect-[1.414/1] bg-white border-none" 
+                          title="Sertifikat Kelulusan"
+                        />
+                     ) : (
+                        <img src={selectedCertificate.fileUrl} alt="Sertifikat" className="w-full h-auto object-contain bg-white" />
+                     )}
+                  </div>
+                  <Button asChild size="lg" className="rounded-xl bg-slate-900 hover:bg-black text-white px-10 h-12 font-bold uppercase tracking-widest text-xs">
+                     <a href={selectedCertificate.fileUrl} download target="_blank" rel="noopener noreferrer">Download Sertifikat</a>
+                  </Button>
+               </div>
+             )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  // --- PLAYER MODE ---
+  const currentLvl = levels.find(l => l.level === selectedLevel);
+  const reportsA = currentLvl?.halfA || [];
+  const reportsB = currentLvl?.halfB || [];
+  
+  // Progress calculation
+  const totalWeeks = 16;
+  const completedWeeks = (reportsA.length + reportsB.length);
+  const progressPercent = Math.min(Math.round((completedWeeks / totalWeeks) * 100), 100);
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col h-screen overflow-hidden">
+      {/* Player Header */}
+      <header className="h-16 border-b border-slate-200 shrink-0 flex items-center justify-between px-4 sm:px-6 bg-white z-50">
+        <div className="flex items-center gap-4 min-w-0">
+           <Button variant="ghost" size="sm" onClick={() => setViewMode('dashboard')} className="rounded-xl hover:bg-slate-100 shrink-0 gap-2 px-2 sm:px-3 text-slate-600">
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-xs font-bold">Dashboard</span>
+           </Button>
+           <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+           <div className="min-w-0">
+              <h2 className="font-bold text-slate-900 truncate text-sm sm:text-base">Level {selectedLevel} - Kurikulum Pembelajaran</h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden sm:block">School of Technology Digikidz</p>
+           </div>
+        </div>
+        <div className="flex items-center gap-4">
+           <img src={logodk} alt="DIGIKIDZ" className="h-6 sm:h-8 hidden xs:block" />
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl relative z-10 animate-fade-in">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-110 animate-pulse" />
-              <Loader2 className="h-12 w-12 animate-spin text-primary relative" />
-            </div>
-            <p className="font-bold text-muted-foreground animate-pulse">Menghubungkan ke arsip...</p>
-          </div>
-        ) : reports.length === 0 ? (
-          <div className="py-12">
-            <EmptyState
-              title="Laporan Belum Tersedia"
-              description={`Sepertinya Coach belum menambahkan laporan aktivitas untuk ${studentName}. Hubungi Coach untuk informasi lebih lanjut.`}
-            />
-          </div>
-        ) : (
-          <div className="space-y-12">
-            {levels.map((lvl) => (
-              <div key={lvl.level} className="space-y-8">
-                <div className="flex items-center gap-4">
-                  <div className="bg-primary p-3 rounded-2xl shadow-lg shadow-primary/20">
-                    <BookOpen className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-foreground tracking-tight">Level {lvl.level}</h3>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Kurikulum Pembelajaran</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-8">
-                  <div className="glass-card p-5 sm:p-10 rounded-[2.5rem] sm:rounded-[4rem] border-none shadow-2xl shadow-primary/5 bg-background/40 backdrop-blur-md">
-
-                    <WeekRow
-                      label={`Tahap Awal (Week ${lvl.start} – ${lvl.start + 7})`}
-                      reports={lvl.halfA}
-                      onReportClick={setSelectedReport}
-                    />
-                  </div>
-                  <div className="glass-card p-5 sm:p-10 rounded-[2.5rem] sm:rounded-[4rem] border-none shadow-2xl shadow-primary/5 bg-background/40 backdrop-blur-md">
-                    <WeekRow
-                      label={`Tahap Lanjut (Week ${lvl.start + 8} – ${lvl.end})`}
-                      reports={lvl.halfB}
-                      onReportClick={setSelectedReport}
-                    />
-                  </div>
-                </div>
-
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-20 pt-8 border-t border-border/50 text-center">
-          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em]">© School Of Technology Digikidz</p>
-        </div>
-      </main>
-
-      {/* Floating Logout Button */}
-      <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40">
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="default" size="lg" className="rounded-full h-14 px-6 sm:px-8 shadow-2xl shadow-destructive/20 bg-background border-2 border-destructive text-destructive hover:bg-destructive hover:text-white font-bold transition-all group">
-              <LogOut className="h-5 w-5 sm:mr-2 group-hover:-translate-x-1 transition-transform" />
-              <span className="hidden sm:inline text-base">Keluar Portal</span>
-              <span className="sm:hidden ml-2 text-sm">Keluar</span>
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent className="rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 max-w-md border-none shadow-3xl bg-background/95 backdrop-blur-xl w-[90vw] sm:w-full">
-            <AlertDialogHeader className="space-y-4">
-              <div className="mx-auto bg-destructive/10 w-16 h-16 rounded-full flex items-center justify-center mb-2">
-                <LogOut className="h-8 w-8 text-destructive" />
-              </div>
-              <AlertDialogTitle className="text-2xl font-black text-center text-foreground">Keluar dari Portal?</AlertDialogTitle>
-              <AlertDialogDescription className="text-center text-sm font-medium text-muted-foreground leading-relaxed">
-                Anda harus memasukkan ulang <span className="font-bold text-foreground">6 digit kode akses</span> jika ingin melihat laporan anak Anda kembali.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="mt-8 flex flex-col sm:flex-row gap-3">
-              <AlertDialogCancel className="w-full sm:w-1/2 rounded-xl h-12 font-bold bg-muted/50 hover:bg-muted border-none">Batal</AlertDialogCancel>
-              <AlertDialogAction onClick={onBack} className="w-full sm:w-1/2 rounded-xl h-12 font-bold bg-destructive hover:bg-destructive/90 text-white shadow-lg shadow-destructive/20 border-none">
-                Ya, Keluar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-
-      {/* Centralized Report Detail Dialog */}
-      <Dialog open={!!selectedReport} onOpenChange={(open) => !open && setSelectedReport(null)}>
-        <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border-none shadow-3xl bg-background/95 backdrop-blur-xl w-[92vw] sm:w-full">
-
-
-          {selectedReport && (
-            <div className="flex flex-col h-full max-h-[90vh]">
-              <div className="bg-primary p-5 sm:p-8 text-white relative">
-                <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                  <Sparkles className="w-24 h-24" />
-                </div>
-                <DefaultDialogHeader className="p-0 text-left space-y-2 pr-8">
-
-                  <div className="flex items-center gap-2">
-                    <div className="bg-white/20 px-3 py-1 rounded-full backdrop-blur-md">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white">Week {selectedReport.lessonWeek}</p>
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Main Content Area */}
+        <main className={`flex-1 overflow-y-auto bg-slate-50/30 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:mr-[350px]' : ''}`}>
+           <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+              {selectedReport ? (
+                 <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-primary p-6 sm:p-10 text-white relative">
+                       <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                          <Sparkles className="w-32 h-32" />
+                       </div>
+                       <div className="flex items-center gap-2 mb-4">
+                          <div className="bg-white/20 px-3 py-1 rounded-full backdrop-blur-md">
+                             <p className="text-[10px] font-black uppercase tracking-widest text-white">Week {selectedReport.lessonWeek}</p>
+                          </div>
+                          <div className="h-1 w-1 rounded-full bg-white/50" />
+                          <p className="text-[10px] font-black uppercase tracking-widest text-white/80">{selectedReport.level}</p>
+                       </div>
+                       <h1 className="text-2xl sm:text-4xl font-black leading-tight tracking-tight">{selectedReport.lessonName}</h1>
                     </div>
-                    <div className="h-1 w-1 rounded-full bg-white/50" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/80">{selectedReport.level}</p>
-                  </div>
-                  <DefaultDialogTitle className="text-xl sm:text-3xl font-black text-white leading-tight">
-                    {selectedReport.lessonName}
-                  </DefaultDialogTitle>
 
-                </DefaultDialogHeader>
+                    <div className="p-6 sm:p-10 space-y-10">
+                       {/* Section: Goals */}
+                       {selectedReport.goalsMateri && (
+                          <div className="space-y-6">
+                             <div className="flex items-center gap-3">
+                                <div className="h-6 w-1.5 rounded-full bg-primary" />
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Goals Materi</h3>
+                             </div>
+                             <div className="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-100">
+                                <ul className="space-y-4">
+                                   {selectedReport.goalsMateri.split('\n').filter(Boolean).map((line, i) => (
+                                      <li key={i} className="flex gap-4">
+                                         <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-[10px] font-black">
+                                           {i + 1}
+                                         </div>
+                                         <p className="text-slate-700 font-medium leading-relaxed">{line.replace(/^\d+\.\s*/, '')}</p>
+                                      </li>
+                                   ))}
+                                </ul>
+                             </div>
+                          </div>
+                       )}
+
+                       {/* Section: Summary */}
+                       {selectedReport.activityReportText && (
+                          <div className="space-y-6">
+                             <div className="flex items-center gap-3">
+                                <div className="h-6 w-1.5 rounded-full bg-primary" />
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Activity Report</h3>
+                             </div>
+                             <div className="prose prose-slate max-w-none">
+                                <p className="text-slate-600 font-medium leading-relaxed whitespace-pre-line text-lg italic">
+                                   <LinkifiedText text={selectedReport.activityReportText} />
+                                </p>
+                             </div>
+                          </div>
+                       )}
+
+                       {/* Section: Media */}
+                       {selectedReport.mediaUrls.length > 0 && (
+                          <div className="space-y-6">
+                             <div className="flex items-center gap-3">
+                                <div className="h-6 w-1.5 rounded-full bg-primary" />
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Dokumentasi Kelas</h3>
+                             </div>
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                 {selectedReport.mediaUrls.map((url, i) => {
+                                   const isVideo = url.toLowerCase().match(/\.(mov|mp4|webm|ogg)$/);
+                                   
+                                   if (isVideo) {
+                                     return (
+                                       <div key={i} className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-black relative group aspect-video sm:aspect-square">
+                                          <video 
+                                            src={url} 
+                                            className="w-full h-full object-cover"
+                                            autoPlay 
+                                            muted 
+                                            loop 
+                                            playsInline
+                                            controls={false}
+                                          />
+                                          <a 
+                                            href={url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                          >
+                                             <span className="bg-white/90 text-slate-900 px-4 py-2 rounded-full text-xs font-bold shadow-lg">Buka Video HD</span>
+                                          </a>
+                                       </div>
+                                     );
+                                   }
+
+                                   return (
+                                     <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="rounded-2xl overflow-hidden border border-slate-200 group shadow-sm bg-slate-100 aspect-video sm:aspect-square">
+                                        <img 
+                                          src={url} 
+                                          alt={`Kegiatan ${i+1}`} 
+                                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                                          loading="lazy"
+                                        />
+                                     </a>
+                                   );
+                                 })}
+                             </div>
+                          </div>
+                       )}
+
+                       {/* Footer Meta */}
+                       <div className="pt-10 border-t border-slate-100 flex flex-col sm:flex-row justify-between gap-6">
+                          <div>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Coach Pengajar :</p>
+                             <div className="flex items-center gap-2">
+                                <div className="p-2 bg-primary/10 rounded-lg"><User className="w-4 h-4 text-primary" /></div>
+                                <span className="font-bold text-slate-900">{selectedReport.coach}</span>
+                             </div>
+                          </div>
+                          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                             Sesi pada {new Date(selectedReport.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              ) : (
+                 <div className="h-full flex flex-col items-center justify-center py-20 text-center space-y-6">
+                    <div className="bg-slate-50 p-8 rounded-full">
+                       <PlayCircle className="w-16 h-16 text-slate-200" />
+                    </div>
+                    <div>
+                       <h3 className="text-xl font-black text-slate-900">Pilih Pertemuan</h3>
+                       <p className="text-slate-500 font-medium">Klik salah satu minggu di daftar sebelah kanan untuk melihat detail laporan aktivitas.</p>
+                    </div>
+                 </div>
+              )}
+           </div>
+        </main>
+
+        {/* Right Sidebar List */}
+        <aside 
+          className={`fixed inset-y-0 right-0 w-full sm:w-[350px] bg-white border-l border-slate-200 z-[60] transform transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        >
+           <div className="h-full flex flex-col bg-white">
+              <div className="p-5 border-b border-slate-100">
+                 <div className="flex items-center justify-between mb-4 lg:mb-0">
+                    <h2 className="font-black text-slate-900 tracking-tight">Daftar pertemuan</h2>
+                    <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="lg:hidden rounded-full">
+                       <ChevronRight className="w-5 h-5" />
+                    </Button>
+                 </div>
+                 
+                 {/* Mobile direct back button */}
+                 <Button 
+                   variant="outline" 
+                   size="sm" 
+                   onClick={() => {
+                      setViewMode('dashboard');
+                      setIsSidebarOpen(false);
+                   }}
+                   className="w-full lg:hidden rounded-xl border-slate-200 text-slate-600 font-bold gap-2 mb-2"
+                 >
+                    <LayoutDashboard className="w-4 h-4" />
+                    Kembali ke Aktivitas Belajar
+                 </Button>
+              </div>
+              
+              <div className="p-5 bg-slate-50/50 border-b border-slate-100">
+                 <div className="flex justify-between items-end mb-2">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Progress Level</span>
+                    <span className="text-sm font-black text-primary">{progressPercent}% Selesai</span>
+                 </div>
+                 <Progress value={progressPercent} className="h-2 bg-slate-200 shadow-inner" />
               </div>
 
               <ScrollArea className="flex-1">
-                <div className="p-4 sm:p-10 space-y-6 sm:space-y-8">
-                  {/* Bio Info Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 bg-muted/30 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/50">
-
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Nama Murid</p>
-                      <p className="font-bold text-foreground flex items-center gap-2 text-sm">
-                        <User className="h-3.5 w-3.5 text-primary" /> {selectedReport.studentName}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Tanggal Sesi</p>
-                      <p className="font-bold text-foreground text-sm">
-                        📅 {new Date(selectedReport.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                      </p>
-                    </div>
-                    <div className="space-y-1 sm:col-span-2 pt-2 border-t border-border/30">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Tools & Platform</p>
-                      <p className="font-bold text-foreground text-sm">🛠 {selectedReport.tools || '-'}</p>
-                    </div>
-                  </div>
-
-                  {/* Goals & Activity Sections */}
-                  <div className="space-y-8">
-                    {selectedReport.goalsMateri && (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <div className="h-5 w-1 rounded-full bg-primary" />
-                          <h4 className="font-black text-[10px] sm:text-sm uppercase tracking-widest text-foreground">Goals Materi</h4>
-                        </div>
-                        <ul className="grid grid-cols-1 gap-2 sm:gap-3">
-                          {selectedReport.goalsMateri.split('\n').filter(Boolean).map((line, i) => (
-                            <li key={i} className="flex gap-3 text-sm text-foreground bg-muted/20 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-border/20">
-
-                              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[10px] font-black text-primary">
-                                {i + 1}
-                              </span>
-                              <span className="leading-relaxed font-medium">{line.replace(/^\d+\.\s*/, '')}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {selectedReport.activityReportText && (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <div className="h-5 w-1 rounded-full bg-primary" />
-                          <h4 className="font-black text-sm uppercase tracking-widest text-foreground">Activity Summary</h4>
-                        </div>
-                        <div className="bg-card/50 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border/30 shadow-inner">
-                          <div className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-medium whitespace-pre-line italic">
-                            "<LinkifiedText text={selectedReport.activityReportText} />"
-                          </div>
-                        </div>
-
-                      </div>
-                    )}
-
-                    {selectedReport.coachComment && (
-                      <div className="bg-amber-50 border border-amber-200/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-3 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform">
-                          <Sparkles className="h-10 w-10 text-amber-500" />
-                        </div>
-                        <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Komentar Khusus Coach :</p>
-                        <p className="text-xs sm:text-sm text-amber-900 font-bold leading-relaxed">{selectedReport.coachComment}</p>
-                      </div>
-                    )}
-
-
-                    {selectedReport.externalLinks && selectedReport.externalLinks.length > 0 && (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <div className="h-5 w-1 rounded-full bg-primary" />
-                          <h4 className="font-black text-sm uppercase tracking-widest text-foreground">Link Tambahan</h4>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {selectedReport.externalLinks.map((link, i) => (
-                            <a
-                              key={i}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-between p-4 rounded-2xl border border-border/30 bg-muted/20 hover:bg-primary/5 hover:border-primary/30 transition-all group"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-background shadow-sm border border-border/10 group-hover:text-primary transition-colors">
-                                  <LinkIcon className="h-4 w-4" />
+                 <div className="p-2 space-y-1">
+                    <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full">
+                       <AccordionItem value="item-1" className="border-none">
+                          <AccordionTrigger className="hover:no-underline px-3 py-4 rounded-xl hover:bg-slate-50 group">
+                             <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-data-[state=open]:bg-blue-600 group-data-[state=open]:text-white transition-colors">
+                                   <FolderOpen className="w-4 h-4" />
                                 </div>
-                                <span className="text-sm font-bold text-foreground">{link.label || 'Buka Link'}</span>
-                              </div>
-                              <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                                <span className="font-bold text-sm text-slate-700">Tahap Awal (W1-8)</span>
+                             </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="pt-1 pb-2 px-2 space-y-1">
+                             {reportsA.length > 0 ? reportsA.map(r => (
+                                <button 
+                                  key={r.id}
+                                  onClick={() => {
+                                     setSelectedReport(r);
+                                     if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                                  }}
+                                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === r.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}
+                                >
+                                   <div className={`w-2 h-2 rounded-full shrink-0 ${selectedReport?.id === r.id ? 'bg-primary' : 'bg-slate-200'}`} />
+                                   <div className="min-w-0">
+                                      <p className="text-xs font-black leading-tight mb-1">Week {r.lessonWeek}</p>
+                                      <p className="text-[11px] font-bold truncate leading-none">{r.lessonName}</p>
+                                   </div>
+                                </button>
+                             )) : <div className="p-4 text-[10px] text-center italic text-slate-400">Belum ada modul terisi</div>}
+                          </AccordionContent>
+                       </AccordionItem>
 
-                    {selectedReport.mediaUrls.length > 0 && (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <div className="h-5 w-1 rounded-full bg-primary" />
-                          <h4 className="font-black text-sm uppercase tracking-widest text-foreground">Dokumentasi Kelas</h4>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {selectedReport.mediaUrls.map((url, i) => (
-                            <a
-                              key={i}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="aspect-square relative group overflow-hidden rounded-2xl border border-border/50"
-                            >
-                              <img
-                                src={url}
-                                alt={`Kegiatan ${i + 1}`}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                              />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <span className="text-white text-[10px] font-bold uppercase tracking-widest">Lihat Foto</span>
-                              </div>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer Modal */}
-                  <div className="pt-8 border-t border-border/30 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Diinput oleh :</p>
-                      <p className="text-sm font-black text-primary">{selectedReport.coach}</p>
-                    </div>
-                    <img src={logodk} alt="Logo" className="h-8 opacity-50" />
-                  </div>
-                </div>
+                       <AccordionItem value="item-2" className="border-none">
+                          <AccordionTrigger className="hover:no-underline px-3 py-4 rounded-xl hover:bg-slate-50 group">
+                             <div className="flex items-center gap-3">
+                                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg group-data-[state=open]:bg-indigo-600 group-data-[state=open]:text-white transition-colors">
+                                   <FolderOpen className="w-4 h-4" />
+                                </div>
+                                <span className="font-bold text-sm text-slate-700">Tahap Lanjut (W9-16)</span>
+                             </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="pt-1 pb-2 px-2 space-y-1">
+                             {reportsB.length > 0 ? reportsB.map(r => (
+                                <button 
+                                  key={r.id}
+                                  onClick={() => {
+                                     setSelectedReport(r);
+                                     if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                                  }}
+                                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === r.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}
+                                >
+                                   <div className={`w-2 h-2 rounded-full shrink-0 ${selectedReport?.id === r.id ? 'bg-primary' : 'bg-slate-200'}`} />
+                                   <div className="min-w-0">
+                                      <p className="text-xs font-black leading-tight mb-1">Week {r.lessonWeek}</p>
+                                      <p className="text-[11px] font-bold truncate leading-none">{r.lessonName}</p>
+                                   </div>
+                                </button>
+                             )) : <div className="p-4 text-[10px] text-center italic text-slate-400">Belum ada modul terisi</div>}
+                          </AccordionContent>
+                       </AccordionItem>
+                    </Accordion>
+                 </div>
               </ScrollArea>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+           </div>
+        </aside>
+
+        {/* Sidebar Toggle Toggle Button (Floating Hook) */}
+        {!isSidebarOpen && (
+           <Button 
+             onClick={() => setIsSidebarOpen(true)}
+             className="fixed right-0 top-1/2 -translate-y-1/2 h-14 w-10 p-0 rounded-l-2xl bg-white border border-slate-200 border-r-0 shadow-xl z-50 text-slate-600 hover:bg-slate-50 hidden lg:flex items-center justify-center"
+           >
+              <PanelRightOpen className="w-5 h-5 mx-auto -translate-x-0.5" />
+           </Button>
+        )}
+        {isSidebarOpen && (
+           <Button 
+             onClick={() => setIsSidebarOpen(false)}
+             className="fixed right-[350px] top-1/2 -translate-y-1/2 h-14 w-10 p-0 rounded-l-2xl bg-white border border-slate-200 border-r-0 shadow-xl z-[70] text-slate-600 hover:bg-slate-50 hidden lg:flex items-center justify-center transform transition-all duration-300"
+           >
+              <PanelRightClose className="w-5 h-5 mx-auto -translate-x-0.5" />
+           </Button>
+        )}
+
+        {/* Mobile FAB list toggle */}
+        <Button 
+          onClick={() => setIsSidebarOpen(true)}
+          className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-slate-900 shadow-2xl text-white lg:hidden z-50 animate-bounce"
+        >
+           <Menu className="w-6 h-6" />
+        </Button>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logodk from '@/assets/logodk.png';
 import { LiveClock } from './LiveClock';
 import { MobileNav } from './MobileNav';
-import { CalendarDays, LayoutGrid, FileText, Users, LogOut } from 'lucide-react';
+import { CalendarDays, LayoutGrid, FileText, Users, LogOut, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ const navItems = [
   { to: '/', label: 'Jadwal', icon: LayoutGrid },
   { to: '/kalender', label: 'Kalender', icon: CalendarDays },
   { to: '/reports', label: 'Reports', icon: FileText },
+  { to: '/sertifikat', label: 'Sertifikat', icon: GraduationCap },
   { to: '/parent', label: 'Parent Portal', icon: Users },
 ];
 

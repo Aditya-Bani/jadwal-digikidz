@@ -12,7 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Copy, Upload, FileText, Key, Pencil, FolderOpen, ChevronLeft, ChevronRight, Link as LinkIcon, ExternalLink, MessageSquare, Share2, Table, Download } from 'lucide-react';
+import { Plus, Trash2, Copy, Upload, FileText, Key, Pencil, FolderOpen, ChevronLeft, ChevronRight, Link as LinkIcon, ExternalLink, MessageSquare, Share2, Table, Download, Image, CalendarRange, ToggleLeft, ToggleRight } from 'lucide-react';
+import { useHolidayBanners, uploadBannerImage } from '@/hooks/useHolidayBanners';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { groupReportsByLevel } from '@/lib/levelUtils';
 import { EmptyState } from '@/components/EmptyState';
@@ -407,6 +408,34 @@ export default function ReportsAdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const REPORTS_PER_PAGE = 10;
 
+  // Holiday Banners
+  const { banners, loading: bannersLoading, addBanner, toggleBanner, deleteBanner } = useHolidayBanners();
+  const [bannerName, setBannerName] = useState('');
+  const [bannerStartDate, setBannerStartDate] = useState('');
+  const [bannerEndDate, setBannerEndDate] = useState('');
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerUploading, setBannerUploading] = useState(false);
+
+  const handleAddBanner = async () => {
+    if (!bannerName.trim() || !bannerStartDate || !bannerEndDate || !bannerFile) {
+      toast({ title: 'Error', description: 'Harap isi semua field dan pilih foto.', variant: 'destructive' });
+      return;
+    }
+    setBannerUploading(true);
+    const imageUrl = await uploadBannerImage(bannerFile);
+    if (!imageUrl) {
+      toast({ title: 'Error', description: 'Gagal memproses foto. Coba pilih foto lain.', variant: 'destructive' });
+      setBannerUploading(false);
+      return;
+    }
+    await addBanner({ name: bannerName.trim(), imageUrl, startDate: bannerStartDate, endDate: bannerEndDate, isActive: true });
+    setBannerName('');
+    setBannerStartDate('');
+    setBannerEndDate('');
+    setBannerFile(null);
+    setBannerUploading(false);
+  };
+
   const filteredCodes = codes.filter((c) =>
     !searchCode || c.studentName.toLowerCase().includes(searchCode.toLowerCase())
   );
@@ -604,6 +633,9 @@ export default function ReportsAdminPage() {
               </TabsTrigger>
               <TabsTrigger value="update" className="px-6 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold gap-2">
                 <FolderOpen className="w-4 h-4" /> Update Perkembangan Murid
+              </TabsTrigger>
+              <TabsTrigger value="banners" className="px-6 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold gap-2">
+                <Image className="w-4 h-4" /> Banner Hari Raya
               </TabsTrigger>
             </TabsList>
           </div>
@@ -909,6 +941,145 @@ export default function ReportsAdminPage() {
               );
             })()}
           </TabsContent>
+
+          {/* ── Tab: Banner Hari Raya ── */}
+          <TabsContent value="banners" className="animate-fade-in">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+              {/* Upload Form */}
+              <div className="lg:col-span-1">
+                <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 space-y-5">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    <Plus className="w-4 h-4 text-primary" /> Tambah Banner
+                  </h3>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nama Event</Label>
+                    <Input
+                      value={bannerName}
+                      onChange={(e) => setBannerName(e.target.value)}
+                      placeholder="Contoh: Selamat Idul Fitri 1447H"
+                      className="h-11 rounded-xl"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tanggal Mulai</Label>
+                      <Input type="date" value={bannerStartDate} onChange={(e) => setBannerStartDate(e.target.value)} className="h-11 rounded-xl" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tanggal Akhir</Label>
+                      <Input type="date" value={bannerEndDate} onChange={(e) => setBannerEndDate(e.target.value)} className="h-11 rounded-xl" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Foto Banner</Label>
+                    <div className="relative">
+                      <Input
+                        id="banner-file-input"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setBannerFile(e.target.files?.[0] || null)}
+                        className="h-11 rounded-xl file:mr-3 file:font-bold file:text-primary file:bg-primary/10 file:border-0 file:rounded-lg file:h-full file:px-3 cursor-pointer"
+                      />
+                    </div>
+                    {bannerFile && (
+                      <div className="mt-2 rounded-xl overflow-hidden border border-border/50">
+                        <img
+                          src={URL.createObjectURL(bannerFile)}
+                          alt="Preview"
+                          className="w-full max-h-40 object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    onClick={handleAddBanner}
+                    disabled={bannerUploading}
+                    className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20"
+                  >
+                    {bannerUploading ? (
+                      <><Upload className="w-4 h-4 mr-2 animate-spin" />Mengunggah...</>
+                    ) : (
+                      <><Plus className="w-4 h-4 mr-2" />Simpan Banner</>
+                    )}
+                  </Button>
+                  <p className="text-[10px] text-muted-foreground italic text-center leading-relaxed">
+                    💡 Foto dikompresi & disimpan otomatis, tidak perlu layanan penyimpanan eksternal.
+                  </p>
+                </div>
+              </div>
+
+              {/* Banner List */}
+              <div className="lg:col-span-2">
+                <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 min-h-[400px]">
+                  <h3 className="text-lg font-bold flex items-center gap-2 mb-6">
+                    <CalendarRange className="w-4 h-4 text-primary" /> Daftar Banner
+                  </h3>
+                  {bannersLoading ? (
+                    <div className="flex items-center justify-center py-16">
+                      <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+                    </div>
+                  ) : banners.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 opacity-50 space-y-3">
+                      <Image className="w-12 h-12 text-muted-foreground" />
+                      <p className="text-sm font-bold text-muted-foreground">Belum ada banner.</p>
+                      <p className="text-xs text-muted-foreground">Tambahkan banner hari raya pertama di form kiri.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {banners.map((banner) => {
+                        const today = new Date().toISOString().split('T')[0];
+                        const isCurrentlyActive = banner.isActive && banner.startDate <= today && banner.endDate >= today;
+                        return (
+                          <div key={banner.id} className="flex gap-4 p-4 rounded-2xl border border-border/50 bg-background/50 hover:bg-card transition-colors group">
+                            <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-border/50">
+                              <img src={banner.imageUrl} alt={banner.name} className="w-full h-full object-cover" />
+                              {isCurrentlyActive && (
+                                <div className="absolute top-1 left-1 bg-green-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">
+                                  Live
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-sm text-foreground truncate">{banner.name}</p>
+                              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                                <CalendarRange className="w-3 h-3" />
+                                {banner.startDate} → {banner.endDate}
+                              </p>
+                              <div className="flex items-center gap-2 mt-3">
+                                <button
+                                  onClick={() => toggleBanner(banner.id, !banner.isActive)}
+                                  className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all ${
+                                    banner.isActive
+                                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                  }`}
+                                >
+                                  {banner.isActive ? (
+                                    <><ToggleRight className="w-3.5 h-3.5" />Aktif</>
+                                  ) : (
+                                    <><ToggleLeft className="w-3.5 h-3.5" />Nonaktif</>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => deleteBanner(banner.id)}
+                                  className="flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />Hapus
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </TabsContent>
+
         </Tabs>
 
         {/* Edit Dialog */}

@@ -10,27 +10,45 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface DeleteConfirmDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  isOpen?: boolean; // Support variant
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void; // Support variant
   onConfirm: () => void;
   studentName?: string;
+  title?: string;
+  description?: string;
 }
 
 export function DeleteConfirmDialog({
   open,
+  isOpen,
   onOpenChange,
+  onClose,
   onConfirm,
   studentName,
+  title,
+  description
 }: DeleteConfirmDialogProps) {
+  const isDialogActive = open !== undefined ? open : !!isOpen;
+  const handleOpenChange = (val: boolean) => {
+     if (onOpenChange) onOpenChange(val);
+     if (!val && onClose) onClose();
+  };
+
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={isDialogActive} onOpenChange={handleOpenChange}>
       <AlertDialogContent className="bg-card">
         <AlertDialogHeader>
-          <AlertDialogTitle>Hapus Jadwal</AlertDialogTitle>
+          <AlertDialogTitle>{title || 'Hapus Jadwal'}</AlertDialogTitle>
           <AlertDialogDescription>
-            Apakah Anda yakin ingin menghapus jadwal{' '}
-            <span className="font-semibold text-foreground">{studentName}</span>?
-            Tindakan ini tidak dapat dibatalkan.
+            {description || (
+               <>
+                 Apakah Anda yakin ingin menghapus jadwal{' '}
+                 <span className="font-semibold text-foreground">{studentName}</span>?
+                 Tindakan ini tidak dapat dibatalkan.
+               </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

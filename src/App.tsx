@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import CalendarPage from "./pages/CalendarPage";
 import ReportsAdminPage from "./pages/ReportsAdminPage";
 import ParentPortalPage from "./pages/ParentPortalPage";
+import CertificatesAdminPage from "./pages/CertificatesAdminPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/kalender" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><ReportsAdminPage /></ProtectedRoute>} />
+            <Route path="/sertifikat" element={<ProtectedRoute><CertificatesAdminPage /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

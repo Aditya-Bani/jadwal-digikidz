@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, LayoutGrid, CalendarDays, FileText, Users } from 'lucide-react';
+import { Menu, LayoutGrid, CalendarDays, FileText, Users, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import logodk from '@/assets/logodk.png';
@@ -10,6 +10,7 @@ const navItems = [
   { to: '/', label: 'Jadwal', icon: LayoutGrid },
   { to: '/kalender', label: 'Kalender', icon: CalendarDays },
   { to: '/reports', label: 'Reports', icon: FileText },
+  { to: '/sertifikat', label: 'Sertifikat', icon: GraduationCap },
   { to: '/parent', label: 'Parent Portal', icon: Users },
 ];
 
