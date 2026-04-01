@@ -43,7 +43,9 @@ import {
   PanelRightOpen,
   LayoutDashboard,
   Menu,
-  PlayCircle
+  PlayCircle,
+  Trophy,
+  Medal
 } from 'lucide-react';
 import {
   Dialog,
@@ -251,7 +253,7 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const levels = groupReportsByLevel(reports);
-
+  
   // Helper to get certificate for a level
   const getCertForLevel = (levelNumber: number) => {
     return certificates.find(cert => {
@@ -264,6 +266,13 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
       const certLevelNumber = matchResult ? parseInt(matchResult[0], 10) : null;
       return certLevelNumber === levelNumber;
     });
+  };
+
+  // Dashboard Stats
+  const stats = {
+    totalReports: reports.length,
+    completedLevels: levels.filter(l => !!getCertForLevel(l.level)).length,
+    currentLevel: levels.find(l => !getCertForLevel(l.level))?.level || Math.max(...levels.map(l => l.level), 0)
   };
 
   const handleStartLevel = (level: number) => {
@@ -315,9 +324,29 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
         </header>
 
         <main className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
-          <div className="mb-10 text-center sm:text-left">
-             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Aktivitas Belajar</h1>
-             <p className="text-slate-500 font-medium mt-1">Pantau perkembangan dan raih sertifikat belajarmu.</p>
+          <div className="mb-10 sm:flex items-end justify-between gap-6">
+             <div className="text-center sm:text-left mb-6 sm:mb-0">
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Aktivitas Belajar</h1>
+                <p className="text-slate-500 font-medium mt-1">Pantau perkembangan dan raih sertifikat belajarmu.</p>
+             </div>
+             
+             {/* Stats Header */}
+             <div className="grid grid-cols-3 gap-2 sm:gap-4 bg-white/50 backdrop-blur-md p-3 rounded-2xl border border-white shadow-sm shrink-0">
+                <div className="text-center px-2">
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Sesi</p>
+                   <p className="text-lg font-black text-primary leading-none">{stats.totalReports}</p>
+                </div>
+                <div className="w-px h-8 bg-slate-200 self-center" />
+                <div className="text-center px-2">
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lulus</p>
+                   <p className="text-lg font-black text-emerald-600 leading-none">{stats.completedLevels} <span className="text-[10px] text-slate-400">lvl</span></p>
+                </div>
+                <div className="w-px h-8 bg-slate-200 self-center" />
+                <div className="text-center px-2">
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Target</p>
+                   <p className="text-lg font-black text-amber-500 leading-none">Lv {stats.currentLevel}</p>
+                </div>
+             </div>
           </div>
 
           <div className="space-y-4">
@@ -331,22 +360,31 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
                const isCompleted = !!cert;
                
                return (
-                 <div key={lvl.level} className="group bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                       <div className="flex items-start gap-4">
-                          <div className={`mt-1 p-2 rounded-lg ${isCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
-                             {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />}
-                          </div>
-                          <div>
-                             <div className="flex items-center gap-2 mb-1">
-                                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                                   {isCompleted ? 'Telah diselesaikan' : 'Sedang dipelajari'}
-                                </span>
-                             </div>
-                             <h3 className="text-xl font-bold text-slate-900">Level {lvl.level} - Kurikulum Pembelajaran</h3>
-                             <p className="text-sm text-slate-500 font-medium mt-1">Berisi laporan aktivitas mingguan dari Week {lvl.start} - {lvl.end}.</p>
-                          </div>
-                       </div>
+                 <div 
+                    key={lvl.level} 
+                    className={`group bg-white border rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden ${isCompleted ? 'border-emerald-200 shadow-emerald-500/5 ring-1 ring-emerald-100/50' : 'border-slate-200'}`}
+                  >
+                     {isCompleted && (
+                        <div className="absolute top-0 right-0 p-4 opacity-10 -mr-2 -mt-2 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                           <Trophy className="w-20 h-20 text-emerald-600" />
+                        </div>
+                     )}
+                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
+                        <div className="flex items-start gap-4">
+                           <div className={`mt-1 p-2 rounded-lg ${isCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                              {isCompleted ? <Medal className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />}
+                           </div>
+                           <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                 <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                    {isCompleted ? 'Telah diselesaikan' : 'Sedang dipelajari'}
+                                 </span>
+                                 {isCompleted && <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />}
+                              </div>
+                              <h3 className="text-xl font-bold text-slate-900">Level {lvl.level} - Kurikulum Pembelajaran</h3>
+                              <p className="text-sm text-slate-500 font-medium mt-1">Berisi laporan aktivitas mingguan dari Week {lvl.start} - {lvl.end}.</p>
+                           </div>
+                        </div>
                        
                        <div className="flex flex-col sm:flex-row gap-3">
                           {isCompleted && (
@@ -565,18 +603,65 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
                        )}
 
                        {/* Footer Meta */}
-                       <div className="pt-10 border-t border-slate-100 flex flex-col sm:flex-row justify-between gap-6">
-                          <div>
-                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Coach Pengajar :</p>
-                             <div className="flex items-center gap-2">
-                                <div className="p-2 bg-primary/10 rounded-lg"><User className="w-4 h-4 text-primary" /></div>
-                                <span className="font-bold text-slate-900">{selectedReport.coach}</span>
-                             </div>
-                          </div>
-                          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                             Sesi pada {new Date(selectedReport.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                          </div>
-                       </div>
+                        <div className="pt-10 border-t border-slate-100 space-y-8">
+                           <div className="flex flex-col sm:flex-row justify-between gap-6">
+                              <div>
+                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Coach Pengajar :</p>
+                                 <div className="flex items-center gap-2">
+                                    <div className="p-2 bg-primary/10 rounded-lg"><User className="w-4 h-4 text-primary" /></div>
+                                    <span className="font-bold text-slate-900">{selectedReport.coach}</span>
+                                 </div>
+                              </div>
+                              <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                                 Sesi pada {new Date(selectedReport.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                              </div>
+                           </div>
+
+                           {/* Next / Previous Navigation */}
+                           {(() => {
+                              const allReports = [...reportsA, ...reportsB].sort((a, b) => a.lessonWeek - b.lessonWeek);
+                              const currentIndex = allReports.findIndex(r => r.id === selectedReport.id);
+                              const prevReport = currentIndex > 0 ? allReports[currentIndex - 1] : null;
+                              const nextReport = currentIndex < allReports.length - 1 ? allReports[currentIndex + 1] : null;
+
+                              if (!prevReport && !nextReport) return null;
+
+                              return (
+                                 <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-50">
+                                    {prevReport && (
+                                       <Button 
+                                         variant="ghost" 
+                                         onClick={() => setSelectedReport(prevReport)}
+                                         className="flex-1 justify-start gap-3 h-14 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-all group"
+                                       >
+                                          <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-white transition-colors">
+                                             <ChevronLeft className="w-4 h-4 text-slate-500" />
+                                          </div>
+                                          <div className="text-left">
+                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Pertemuan Sebelumnya</p>
+                                             <p className="text-xs font-black text-slate-700 truncate max-w-[150px]">Week {prevReport.lessonWeek}: {prevReport.lessonName}</p>
+                                          </div>
+                                       </Button>
+                                    )}
+                                    {nextReport && (
+                                       <Button 
+                                         variant="ghost" 
+                                         onClick={() => setSelectedReport(nextReport)}
+                                         className="flex-1 justify-end gap-3 h-14 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-all group"
+                                       >
+                                          <div className="text-right">
+                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Pertemuan Selanjutnya</p>
+                                             <p className="text-xs font-black text-slate-700 truncate max-w-[150px]">Week {nextReport.lessonWeek}: {nextReport.lessonName}</p>
+                                          </div>
+                                          <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary group-hover:text-white transition-all">
+                                             <ChevronRight className="w-4 h-4 text-primary group-hover:text-white" />
+                                          </div>
+                                       </Button>
+                                    )}
+                                 </div>
+                              );
+                           })()}
+                        </div>
                     </div>
                  </div>
               ) : (
