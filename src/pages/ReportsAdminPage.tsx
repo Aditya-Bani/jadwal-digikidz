@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Copy, Upload, FileText, Key, Pencil, FolderOpen, ChevronLeft, ChevronRight, Link as LinkIcon, ExternalLink, MessageSquare, Share2, Table, Download, Image, CalendarRange, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, Trash2, Copy, Upload, FileText, Key, Pencil, FolderOpen, ChevronLeft, ChevronRight, Link as LinkIcon, ExternalLink, MessageSquare, Share2, Table, Download, Image, CalendarRange, ToggleLeft, ToggleRight, Sparkles } from 'lucide-react';
 import { useHolidayBanners, uploadBannerImage } from '@/hooks/useHolidayBanners';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { groupReportsByLevel } from '@/lib/levelUtils';
@@ -547,12 +547,21 @@ export default function ReportsAdminPage() {
     setDeletingReportName(name);
   };
 
-  // Group by student untuk folder view - gunakan trim agar konsisten
-  const grouped: Record<string, typeof filteredReports> = {};
-  filteredReports.forEach((r) => {
-    const name = r.studentName.trim();
-    if (!grouped[name]) grouped[name] = [];
-    grouped[name].push(r);
+  // Group by student untuk folder view - gunakan SEMUA laporan agar hitungan akurat (tidak tersembunyi filter coach)
+  const grouped: Record<string, typeof reports> = {};
+  reports.forEach((r) => {
+    // Hanya filter nama jika ada pencarian nama aktif
+    const sName = (r.studentName || "").trim().toLowerCase();
+    const query = searchStudent.trim().toLowerCase();
+    if (searchStudent && !sName.includes(query)) return;
+
+    // Gunakan nama asli (yang sudah di-trim) sebagai key agar Neil dan Neil (spasi) bergabung
+    const name = (r.studentName || "").trim();
+    // Normalisasi case agar Neil dan neil masuk ke folder yang sama
+    const canonicalName = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    
+    if (!grouped[canonicalName]) grouped[canonicalName] = [];
+    grouped[canonicalName].push(r);
   });
   const sortedNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
   const totalPages = Math.ceil(sortedNames.length / REPORTS_PER_PAGE);
@@ -891,22 +900,41 @@ export default function ReportsAdminPage() {
 
             {/* Open folder detail — gunakan groupReportsByLevel dari shared utility */}
             {openFolder && (() => {
-              const studentReports = filteredReports
-                .filter((r) => r.studentName === openFolder)
+              // Cari semua report murid ini dengan case-insensitive dan trim
+              const studentReports = reports
+                .filter((r) => r.studentName.trim().toLowerCase() === openFolder.toLowerCase())
                 .sort((a, b) => a.lessonWeek - b.lessonWeek);
+              
               if (studentReports.length === 0) return null;
 
-              const levels = groupReportsByLevel(studentReports);
+              const { levels, trialReport } = groupReportsByLevel(studentReports);
 
               return (
-                <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <FolderOpen className="h-5 w-5 text-primary" />
-                      {openFolder}
-                    </h3>
-                    <Button variant="ghost" size="sm" onClick={() => setOpenFolder(null)}>Tutup</Button>
+                <div className="mt-4 space-y-3 pb-20">
+                  <div className="flex items-center justify-between bg-card p-4 rounded-2xl border border-border/50 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-xl">
+                        <FolderOpen className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground leading-none">{openFolder}</h3>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{studentReports.length} Total Laporan</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setOpenFolder(null)} className="rounded-xl hover:bg-destructive/10 hover:text-destructive transition-colors">Tutup</Button>
                   </div>
+
+                  {/* Sesi Trial jika ada */}
+                  {trialReport && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
+                        Sesi Perkenalan (Trial)
+                      </h4>
+                      <ReportCard r={trialReport} onEdit={setEditingReport} onDelete={handleDeleteReport} />
+                    </div>
+                  )}
+
                   {levels.map((lvl) => (
                     <div key={lvl.level} className="space-y-3">
                       <h4 className="text-md font-bold text-foreground border-b border-border pb-1">

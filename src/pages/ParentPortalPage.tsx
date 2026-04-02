@@ -46,7 +46,9 @@ import {
   PlayCircle,
   Trophy,
   Medal,
-  ArrowRight
+  ArrowRight,
+  Rocket,
+  LogOut
 } from 'lucide-react';
 import {
   Dialog,
@@ -68,7 +70,6 @@ import {
 import logodk from '@/assets/logodk.png';
 import mascotParent from '@/assets/Mascot Optional CS6_Artboard 8.png';
 import { LinkifiedText } from '@/components/LinkifiedText';
-import { LogOut } from 'lucide-react';
 
 
 export default function ParentPortalPage() {
@@ -246,8 +247,7 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
   const [selectedReport, setSelectedReport] = useState<ActivityReport | null>(null);
   const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  const levels = groupReportsByLevel(reports);
+  const { levels, trialReport } = groupReportsByLevel(reports);
   
   // Program Logic
   const programRaw = reports[0]?.level || '';
@@ -295,6 +295,12 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
     }
   };
 
+  const handleStartTrial = () => {
+    if (!trialReport) return;
+    setSelectedReport(trialReport);
+    setViewMode('player');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center py-24 gap-4">
@@ -318,15 +324,19 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
         <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-               <div className="bg-primary/10 p-2 rounded-xl">
-                  <LayoutDashboard className="w-5 h-5 text-primary" />
+               <img src={logodk} alt="Digikidz" className="h-6 sm:h-8" />
+               <div className="h-4 w-px bg-slate-200" />
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Parent Portal</p>
+            </div>
+            <div className="flex items-center gap-4">
+               <div className="hidden sm:flex flex-col items-end">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Student Account</p>
+                  <p className="text-sm font-black text-slate-800 leading-none">{studentName}</p>
                </div>
-               <div>
-                  <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none">{studentName}</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Dashboard Belajar</p>
+               <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm ring-1 ring-slate-100">
+                  <User className="w-5 h-5 text-slate-400" />
                </div>
             </div>
-            <img src={logodk} alt="DIGIKIDZ" className="h-8 shrink-0 object-contain" />
           </div>
         </header>
 
@@ -355,7 +365,36 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
           </div>
 
           <div className="space-y-4">
-             {levels.length === 0 ? (
+             {/* Trial Session Card */}
+             {trialReport && (
+                <div className="group bg-gradient-to-br from-indigo-50/50 to-white border border-indigo-100 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden ring-1 ring-indigo-50/50">
+                   <div className="absolute top-0 right-0 p-4 opacity-5 -mr-2 -mt-2 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                      <Rocket className="w-20 h-20 text-indigo-600" />
+                   </div>
+                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
+                      <div className="flex items-start gap-4">
+                         <div className="mt-1 p-2 rounded-lg bg-indigo-100 text-indigo-600">
+                            <Sparkles className="w-6 h-6" />
+                         </div>
+                         <div>
+                            <div className="flex items-center gap-2 mb-1">
+                               <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-indigo-600 text-white">
+                                  Sesi Perkenalan
+                               </span>
+                               <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">TRIAL</span>
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900">Masa Percobaan (Trial Session)</h3>
+                            <p className="text-sm text-slate-500 font-medium mt-1">Laporan aktivitas pertama kali saat bergabung di Digikidz.</p>
+                         </div>
+                      </div>
+                      <Button onClick={handleStartTrial} className="rounded-xl font-bold gap-2 h-11 px-8 bg-indigo-600 text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700">
+                         Lihat Detail Trial <ChevronRight className="w-4 h-4" />
+                      </Button>
+                   </div>
+                </div>
+             )}
+
+             {levels.length === 0 && !trialReport ? (
                <EmptyState title="Belum Ada Aktivitas" description="Hubungi Coach jika Anda merasa ini adalah kesalahan." />
              ) : levels.map((lvl) => {
                const cert = getCertForLevel(lvl.level);
