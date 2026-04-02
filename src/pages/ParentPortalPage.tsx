@@ -45,7 +45,8 @@ import {
   Menu,
   PlayCircle,
   Trophy,
-  Medal
+  Medal,
+  ArrowRight
 } from 'lucide-react';
 import {
   Dialog,
@@ -91,9 +92,7 @@ export default function ParentPortalPage() {
     const result = await lookupByCode(code.trim());
     if (result) {
       setStudentName(result.studentName);
-      // Ensure the code used for lookup is preserved if needed, though 'code' state already has it
       toast({ title: 'Berhasil!', description: `Selamat datang, orang tua ${result.studentName}.` });
-
     } else {
       setError('Kode akses tidak ditemukan. Periksa kembali kode Anda.');
     }
@@ -104,7 +103,6 @@ export default function ParentPortalPage() {
     return <ParentReportView studentName={studentName} accessCode={code} onBack={() => setStudentName(null)} />;
   }
 
-
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Decorative Background Elements */}
@@ -114,7 +112,6 @@ export default function ParentPortalPage() {
       </div>
 
       <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center relative z-10 animate-fade-in">
-
         {/* Parent Portal Announcement Banner */}
         {parentNotifications.length > 0 && (
           <div className="col-span-1 lg:col-span-2 mb-2 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-4 sm:p-5 flex items-start sm:items-center gap-4 shadow-sm animate-fade-in">
@@ -240,11 +237,9 @@ export default function ParentPortalPage() {
 }
 
 
-// ─── ParentReportView ──────────────────────────────────────────────────────────
-
 function ParentReportView({ studentName, accessCode, onBack }: { studentName: string; accessCode: string; onBack: () => void }) {
   const { reports, loading } = useActivityReports(studentName, accessCode);
-  const { certificates, loading: certsLoading } = useCertificates(studentName);
+  const { certificates } = useCertificates(studentName);
 
   const [viewMode, setViewMode] = useState<'dashboard' | 'player'>('dashboard');
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
@@ -254,7 +249,21 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
 
   const levels = groupReportsByLevel(reports);
   
-  // Helper to get certificate for a level
+  // Program Logic
+  const programRaw = reports[0]?.level || '';
+  const programName = programRaw.includes(' - ') ? programRaw.split(' - ')[0] : programRaw;
+  
+  const PROGRAM_LIMITS: Record<string, number> = {
+    'Little Creator 1': 3,
+    'Little Creator 2': 3,
+    'Junior 1': 4,
+    'Junior 2': 4,
+    'Teenager 1': 6,
+    'Teenager 2': 6,
+    'Teenager 3': 6,
+  };
+  const maxLevel = PROGRAM_LIMITS[programName] || 6;
+
   const getCertForLevel = (levelNumber: number) => {
     return certificates.find(cert => {
       let certJenjang = cert.level;
@@ -268,18 +277,17 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
     });
   };
 
-  // Dashboard Stats
   const stats = {
     totalReports: reports.length,
     completedLevels: levels.filter(l => !!getCertForLevel(l.level)).length,
-    currentLevel: levels.find(l => !getCertForLevel(l.level))?.level || Math.max(...levels.map(l => l.level), 0)
+    currentLevel: levels.find(l => !getCertForLevel(l.level))?.level || Math.max(...levels.map(l => l.level), 0),
+    programName,
+    maxLevel
   };
 
   const handleStartLevel = (level: number) => {
     setSelectedLevel(level);
     setViewMode('player');
-    
-    // Auto-select first report if available
     const lvlData = levels.find(l => l.level === level);
     if (lvlData) {
       const firstReport = lvlData.halfA[0] || lvlData.halfB[0];
@@ -302,7 +310,6 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
   if (viewMode === 'dashboard') {
     return (
       <div className="min-h-screen bg-slate-50/50 relative overflow-hidden">
-        {/* Decorative Background Elements */}
         <div className="fixed top-0 left-0 w-full h-full pointer-events-none opacity-40">
           <div className="absolute top-[-5%] left-[-5%] w-[30%] h-[30%] bg-primary/10 rounded-full blur-[100px]" />
           <div className="absolute bottom-[-5%] right-[-5%] w-[30%] h-[30%] bg-accent/10 rounded-full blur-[100px]" />
@@ -327,10 +334,8 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
           <div className="mb-10 sm:flex items-end justify-between gap-6">
              <div className="text-center sm:text-left mb-6 sm:mb-0">
                 <h1 className="text-3xl font-black text-slate-900 tracking-tight">Aktivitas Belajar</h1>
-                <p className="text-slate-500 font-medium mt-1">Pantau perkembangan dan raih sertifikat belajarmu.</p>
+                <p className="text-slate-500 font-medium mt-1">Progres pembelajaran di <span className="text-primary font-bold">{stats.programName}</span></p>
              </div>
-             
-             {/* Stats Header */}
              <div className="grid grid-cols-3 gap-2 sm:gap-4 bg-white/50 backdrop-blur-md p-3 rounded-2xl border border-white shadow-sm shrink-0">
                 <div className="text-center px-2">
                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Sesi</p>
@@ -343,63 +348,48 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
                 </div>
                 <div className="w-px h-8 bg-slate-200 self-center" />
                 <div className="text-center px-2">
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Target</p>
-                   <p className="text-lg font-black text-amber-500 leading-none">Lv {stats.currentLevel}</p>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Target Akhir</p>
+                   <p className="text-lg font-black text-amber-500 leading-none">Lv {stats.maxLevel}</p>
                 </div>
              </div>
           </div>
 
           <div className="space-y-4">
              {levels.length === 0 ? (
-               <EmptyState 
-                  title="Belum Ada Aktivitas" 
-                  description="Hubungi Coach jika Anda merasa ini adalah kesalahan."
-               />
+               <EmptyState title="Belum Ada Aktivitas" description="Hubungi Coach jika Anda merasa ini adalah kesalahan." />
              ) : levels.map((lvl) => {
                const cert = getCertForLevel(lvl.level);
                const isCompleted = !!cert;
-               
                return (
-                 <div 
-                    key={lvl.level} 
-                    className={`group bg-white border rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden ${isCompleted ? 'border-emerald-200 shadow-emerald-500/5 ring-1 ring-emerald-100/50' : 'border-slate-200'}`}
-                  >
-                     {isCompleted && (
-                        <div className="absolute top-0 right-0 p-4 opacity-10 -mr-2 -mt-2 rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                           <Trophy className="w-20 h-20 text-emerald-600" />
-                        </div>
-                     )}
-                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
-                        <div className="flex items-start gap-4">
-                           <div className={`mt-1 p-2 rounded-lg ${isCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
-                              {isCompleted ? <Medal className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />}
-                           </div>
-                           <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                 <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                                    {isCompleted ? 'Telah diselesaikan' : 'Sedang dipelajari'}
-                                 </span>
-                                 {isCompleted && <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />}
-                              </div>
-                              <h3 className="text-xl font-bold text-slate-900">Level {lvl.level} - Kurikulum Pembelajaran</h3>
-                              <p className="text-sm text-slate-500 font-medium mt-1">Berisi laporan aktivitas mingguan dari Week {lvl.start} - {lvl.end}.</p>
-                           </div>
-                        </div>
-                       
+                 <div key={lvl.level} className={`group bg-white border rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden ${isCompleted ? 'border-emerald-200 shadow-emerald-500/5 ring-1 ring-emerald-100/50' : 'border-slate-200'}`}>
+                    {isCompleted && (
+                       <div className="absolute top-0 right-0 p-4 opacity-10 -mr-2 -mt-2 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                          <Trophy className="w-20 h-20 text-emerald-600" />
+                       </div>
+                    )}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
+                       <div className="flex items-start gap-4">
+                          <div className={`mt-1 p-2 rounded-lg ${isCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                             {isCompleted ? <Medal className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />}
+                          </div>
+                          <div>
+                             <div className="flex items-center gap-2 mb-1">
+                                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                   {isCompleted ? 'Telah diselesaikan' : 'Sedang dipelajari'}
+                                </span>
+                                {isCompleted && <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />}
+                             </div>
+                             <h3 className="text-xl font-bold text-slate-900">Level {lvl.level} - Kurikulum Pembelajaran</h3>
+                             <p className="text-sm text-slate-500 font-medium mt-1">Berisi laporan aktivitas mingguan dari Week {lvl.start} - {lvl.end}.</p>
+                          </div>
+                       </div>
                        <div className="flex flex-col sm:flex-row gap-3">
                           {isCompleted && (
-                             <Button 
-                               onClick={() => setSelectedCertificate(cert)} 
-                               variant="outline" 
-                               className="rounded-xl border-slate-200 font-bold gap-2 text-slate-600 h-11"
-                             >
+                             <Button onClick={() => setSelectedCertificate(cert)} variant="outline" className="rounded-xl border-slate-200 font-bold gap-2 text-slate-600 h-11">
                                 <FileText className="w-4 h-4" /> Lihat Sertifikat
                              </Button>
                           )}
-                          <Button 
-                            onClick={() => handleStartLevel(lvl.level)}
-                            className={`rounded-xl font-bold gap-2 h-11 px-8 ${isCompleted ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-primary text-white shadow-lg shadow-primary/20'}`}
-                          >
+                          <Button onClick={() => handleStartLevel(lvl.level)} className={`rounded-xl font-bold gap-2 h-11 px-8 ${isCompleted ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-primary text-white shadow-lg shadow-primary/20'}`}>
                              {isCompleted ? 'Cek Activity Report' : 'Lanjutkan Belajar'} <ChevronRight className="w-4 h-4" />
                           </Button>
                        </div>
@@ -410,7 +400,6 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
           </div>
         </main>
 
-        {/* Floating Logout Button */}
         <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40">
            <AlertDialog>
              <AlertDialogTrigger asChild>
@@ -425,9 +414,7 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
                     <LogOut className="h-8 w-8 text-slate-400" />
                   </div>
                   <AlertDialogTitle className="text-2xl font-black text-center">Keluar Portal?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-center font-medium text-slate-500">
-                    Anda perlu memasukkan kode akses kembali untuk masuk.
-                  </AlertDialogDescription>
+                  <AlertDialogDescription className="text-center font-medium text-slate-500">Anda perlu memasukkan kode akses kembali untuk masuk.</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="mt-8 flex gap-3">
                   <AlertDialogCancel className="flex-1 rounded-xl h-12 font-bold bg-slate-100 border-none">Batal</AlertDialogCancel>
@@ -437,18 +424,13 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
            </AlertDialog>
         </div>
 
-        {/* Sertifikat Modal */}
         <Dialog open={!!selectedCertificate} onOpenChange={(open) => !open && setSelectedCertificate(null)}>
           <DialogContent className="max-w-5xl p-0 overflow-hidden rounded-[2rem] bg-slate-50 border-none shadow-3xl w-[94vw] sm:w-full">
              {selectedCertificate && (
                <div className="flex flex-col items-center gap-4 p-4 sm:p-10">
                   <div className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl bg-white ring-1 ring-slate-200">
                      {selectedCertificate.fileUrl.toLowerCase().endsWith('.pdf') ? (
-                        <iframe 
-                          src={`https://docs.google.com/viewer?url=${encodeURIComponent(selectedCertificate.fileUrl)}&embedded=true`} 
-                          className="w-full h-[70vh] sm:h-auto sm:aspect-[1.414/1] bg-white border-none" 
-                          title="Sertifikat Kelulusan"
-                        />
+                        <iframe src={`https://docs.google.com/viewer?url=${encodeURIComponent(selectedCertificate.fileUrl)}&embedded=true`} className="w-full h-[70vh] sm:h-auto sm:aspect-[1.414/1] bg-white border-none" title="Sertifikat Kelulusan" />
                      ) : (
                         <img src={selectedCertificate.fileUrl} alt="Sertifikat" className="w-full h-auto object-contain bg-white" />
                      )}
@@ -464,19 +446,22 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
     );
   }
 
-  // --- PLAYER MODE ---
   const currentLvl = levels.find(l => l.level === selectedLevel);
   const reportsA = currentLvl?.halfA || [];
   const reportsB = currentLvl?.halfB || [];
-  
-  // Progress calculation
   const totalWeeks = 16;
-  const completedWeeks = (reportsA.length + reportsB.length);
+  const completedWeeks = reportsA.length + reportsB.length;
   const progressPercent = Math.min(Math.round((completedWeeks / totalWeeks) * 100), 100);
+
+  // Dynamic Week Labels
+  const lvlNum = selectedLevel || 1;
+  const sW = (lvlNum - 1) * 16 + 1;
+  const mW = sW + 7;
+  const nmW = sW + 8;
+  const eW = sW + 15;
 
   return (
     <div className="min-h-screen bg-white flex flex-col h-screen overflow-hidden">
-      {/* Player Header */}
       <header className="h-16 border-b border-slate-200 shrink-0 flex items-center justify-between px-4 sm:px-6 bg-white z-50">
         <div className="flex items-center gap-4 min-w-0">
            <Button variant="ghost" size="sm" onClick={() => setViewMode('dashboard')} className="rounded-xl hover:bg-slate-100 shrink-0 gap-2 px-2 sm:px-3 text-slate-600">
@@ -489,19 +474,16 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden sm:block">School of Technology Digikidz</p>
            </div>
         </div>
-        <div className="flex items-center gap-4">
-           <img src={logodk} alt="DIGIKIDZ" className="h-6 sm:h-8 hidden xs:block" />
-        </div>
+        <img src={logodk} alt="DIGIKIDZ" className="h-6 sm:h-8 hidden xs:block" />
       </header>
 
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Main Content Area */}
         <main className={`flex-1 overflow-y-auto bg-slate-50/30 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:mr-[350px]' : ''}`}>
            <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
               {selectedReport ? (
                  <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="bg-primary p-6 sm:p-10 text-white relative">
-                       <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                       <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none text-white">
                           <Sparkles className="w-32 h-32" />
                        </div>
                        <div className="flex items-center gap-2 mb-4">
@@ -514,198 +496,136 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
                        <h1 className="text-2xl sm:text-4xl font-black leading-tight tracking-tight">{selectedReport.lessonName}</h1>
                     </div>
 
-                    <div className="p-6 sm:p-10 space-y-10">
-                       {/* Section: Goals */}
-                       {selectedReport.goalsMateri && (
-                          <div className="space-y-6">
-                             <div className="flex items-center gap-3">
-                                <div className="h-6 w-1.5 rounded-full bg-primary" />
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Goals Materi</h3>
+                    <div className="p-6 sm:p-10 space-y-10 relative select-none">
+                       {/* Watermark Overlay */}
+                       <div 
+                          className="absolute inset-0 pointer-events-none opacity-[0.03] z-0 overflow-hidden"
+                          style={{ backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(`<svg width='400' height='400' xmlns='http://www.w3.org/2000/svg'><text x='50%' y='50%' text-anchor='middle' fill='black' font-size='14' font-family='sans-serif' font-weight='bold' transform='rotate(-45 200 200)'>DIGIKIDZ KOTA WISATA CIBUBUR</text></svg>`)}")` }}
+                       />
+                       
+                       <div className="relative z-10 space-y-10">
+                          {selectedReport.goalsMateri && (
+                             <div className="space-y-6">
+                                <div className="flex items-center gap-3">
+                                   <div className="h-6 w-1.5 rounded-full bg-primary" />
+                                   <h3 className="text-xl font-black text-slate-900 tracking-tight">Goals Materi</h3>
+                                </div>
+                                <div className="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-100">
+                                   <ul className="space-y-4">
+                                      {selectedReport.goalsMateri.split('\n').filter(Boolean).map((line, i) => (
+                                         <li key={i} className="flex gap-4">
+                                            <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-[10px] font-black">{i + 1}</div>
+                                            <p className="text-slate-700 font-medium leading-relaxed">{line.replace(/^\d+\.\s*/, '')}</p>
+                                         </li>
+                                      ))}
+                                   </ul>
+                                </div>
                              </div>
-                             <div className="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-100">
-                                <ul className="space-y-4">
-                                   {selectedReport.goalsMateri.split('\n').filter(Boolean).map((line, i) => (
-                                      <li key={i} className="flex gap-4">
-                                         <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-[10px] font-black">
-                                           {i + 1}
-                                         </div>
-                                         <p className="text-slate-700 font-medium leading-relaxed">{line.replace(/^\d+\.\s*/, '')}</p>
-                                      </li>
-                                   ))}
-                                </ul>
+                          )}
+
+                          {selectedReport.activityReportText && (
+                             <div className="space-y-6">
+                                <div className="flex items-center gap-3">
+                                   <div className="h-6 w-1.5 rounded-full bg-primary" />
+                                   <h3 className="text-xl font-black text-slate-900 tracking-tight">Activity Report</h3>
+                                </div>
+                                <div className="prose prose-slate max-w-none">
+                                   <p className="text-slate-600 font-medium leading-relaxed whitespace-pre-line text-lg"><LinkifiedText text={selectedReport.activityReportText} /></p>
+                                </div>
                              </div>
+                          )}
+
+                          {selectedReport.mediaUrls.length > 0 && (
+                             <div className="space-y-6">
+                                <div className="flex items-center gap-3">
+                                   <div className="h-6 w-1.5 rounded-full bg-primary" />
+                                   <h3 className="text-xl font-black text-slate-900 tracking-tight">Dokumentasi Kelas</h3>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {selectedReport.mediaUrls.map((url, i) => {
+                                      const isVideo = url.toLowerCase().match(/\.(mov|mp4|webm|ogg)$/);
+                                      return (
+                                        <div key={i} onContextMenu={(e) => e.preventDefault()} className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-black relative group aspect-video sm:aspect-square">
+                                           {isVideo ? (
+                                             <video src={url} className="w-full h-full object-cover pointer-events-none" autoPlay muted loop playsInline controls={false} onContextMenu={(e) => e.preventDefault()} />
+                                           ) : (
+                                             <img src={url} alt="Activity" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none" onContextMenu={(e) => e.preventDefault()} />
+                                           )}
+                                           <a href={url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                              <span className="bg-white/90 text-slate-900 px-4 py-2 rounded-full text-xs font-bold shadow-lg">Lihat Media Full HD</span>
+                                           </a>
+                                        </div>
+                                      );
+                                    })}
+                                </div>
+                             </div>
+                          )}
+
+                          <div className="pt-10 border-t border-slate-100 space-y-8">
+                             <div className="flex flex-col sm:flex-row justify-between gap-6">
+                                <div>
+                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Coach Pengajar :</p>
+                                   <div className="flex items-center gap-2">
+                                      <div className="p-2 bg-primary/10 rounded-lg"><User className="w-4 h-4 text-primary" /></div>
+                                      <span className="font-bold text-slate-900">{selectedReport.coach}</span>
+                                   </div>
+                                </div>
+                                <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                                   Sesi pada {new Date(selectedReport.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                </div>
+                             </div>
+
+                             {(() => {
+                                const all = [...reportsA, ...reportsB].sort((a, b) => a.lessonWeek - b.lessonWeek);
+                                const idx = all.findIndex(r => r.id === selectedReport.id);
+                                const prev = idx > 0 ? all[idx - 1] : null;
+                                const next = idx < all.length - 1 ? all[idx + 1] : null;
+                                if (!prev && !next) return null;
+                                return (
+                                   <div className="grid grid-cols-2 gap-3 pt-6 border-t border-slate-50">
+                                      {prev ? (
+                                         <Button variant="ghost" onClick={() => setSelectedReport(prev)} className="flex flex-1 items-center justify-start gap-2 h-14 rounded-2xl border border-slate-100 px-2 sm:px-4">
+                                            <ChevronLeft className="w-4 h-4 text-slate-400" />
+                                            <div className="text-left min-w-0">
+                                               <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Sebelumnya</p>
+                                               <p className="text-[10px] sm:text-xs font-black text-slate-700 truncate">Week {prev.lessonWeek}</p>
+                                            </div>
+                                         </Button>
+                                      ) : <div />}
+                                      {next ? (
+                                         <Button variant="ghost" onClick={() => setSelectedReport(next)} className="flex flex-1 items-center justify-end gap-2 h-14 rounded-2xl border border-slate-100 px-2 sm:px-4 text-right">
+                                            <div className="text-right min-w-0">
+                                               <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Selanjutnya</p>
+                                               <p className="text-[10px] sm:text-xs font-black text-slate-700 truncate">Week {next.lessonWeek}</p>
+                                            </div>
+                                            <ChevronRight className="w-4 h-4 text-primary" />
+                                         </Button>
+                                      ) : <div />}
+                                   </div>
+                                );
+                             })()}
                           </div>
-                       )}
-
-                       {/* Section: Summary */}
-                       {selectedReport.activityReportText && (
-                          <div className="space-y-6">
-                             <div className="flex items-center gap-3">
-                                <div className="h-6 w-1.5 rounded-full bg-primary" />
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Activity Report</h3>
-                             </div>
-                             <div className="prose prose-slate max-w-none">
-                                <p className="text-slate-600 font-medium leading-relaxed whitespace-pre-line text-lg">
-                                   <LinkifiedText text={selectedReport.activityReportText} />
-                                </p>
-                             </div>
-                          </div>
-                       )}
-
-                       {/* Section: Media */}
-                       {selectedReport.mediaUrls.length > 0 && (
-                          <div className="space-y-6">
-                             <div className="flex items-center gap-3">
-                                <div className="h-6 w-1.5 rounded-full bg-primary" />
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Dokumentasi Kelas</h3>
-                             </div>
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                 {selectedReport.mediaUrls.map((url, i) => {
-                                   const isVideo = url.toLowerCase().match(/\.(mov|mp4|webm|ogg)$/);
-                                   
-                                   if (isVideo) {
-                                     return (
-                                       <div key={i} className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-black relative group aspect-video sm:aspect-square">
-                                          <video 
-                                            src={url} 
-                                            className="w-full h-full object-cover"
-                                            autoPlay 
-                                            muted 
-                                            loop 
-                                            playsInline
-                                            controls={false}
-                                          />
-                                          <a 
-                                            href={url} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                                          >
-                                             <span className="bg-white/90 text-slate-900 px-4 py-2 rounded-full text-xs font-bold shadow-lg">Buka Video HD</span>
-                                          </a>
-                                       </div>
-                                     );
-                                   }
-
-                                   return (
-                                     <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="rounded-2xl overflow-hidden border border-slate-200 group shadow-sm bg-slate-100 aspect-video sm:aspect-square">
-                                        <img 
-                                          src={url} 
-                                          alt={`Kegiatan ${i+1}`} 
-                                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                                          loading="lazy"
-                                        />
-                                     </a>
-                                   );
-                                 })}
-                             </div>
-                          </div>
-                       )}
-
-                       {/* Footer Meta */}
-                        <div className="pt-10 border-t border-slate-100 space-y-8">
-                           <div className="flex flex-col sm:flex-row justify-between gap-6">
-                              <div>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Coach Pengajar :</p>
-                                 <div className="flex items-center gap-2">
-                                    <div className="p-2 bg-primary/10 rounded-lg"><User className="w-4 h-4 text-primary" /></div>
-                                    <span className="font-bold text-slate-900">{selectedReport.coach}</span>
-                                 </div>
-                              </div>
-                              <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                                 Sesi pada {new Date(selectedReport.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                              </div>
-                           </div>
-
-                           {/* Next / Previous Navigation */}
-                           {(() => {
-                              const allReports = [...reportsA, ...reportsB].sort((a, b) => a.lessonWeek - b.lessonWeek);
-                              const currentIndex = allReports.findIndex(r => r.id === selectedReport.id);
-                              const prevReport = currentIndex > 0 ? allReports[currentIndex - 1] : null;
-                              const nextReport = currentIndex < allReports.length - 1 ? allReports[currentIndex + 1] : null;
-
-                              if (!prevReport && !nextReport) return null;
-
-                              return (
-                                 <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-50">
-                                    {prevReport && (
-                                       <Button 
-                                         variant="ghost" 
-                                         onClick={() => setSelectedReport(prevReport)}
-                                         className="flex-1 justify-start gap-3 h-14 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-all group"
-                                       >
-                                          <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-white transition-colors">
-                                             <ChevronLeft className="w-4 h-4 text-slate-500" />
-                                          </div>
-                                          <div className="text-left">
-                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Pertemuan Sebelumnya</p>
-                                             <p className="text-xs font-black text-slate-700 truncate max-w-[150px]">Week {prevReport.lessonWeek}: {prevReport.lessonName}</p>
-                                          </div>
-                                       </Button>
-                                    )}
-                                    {nextReport && (
-                                       <Button 
-                                         variant="ghost" 
-                                         onClick={() => setSelectedReport(nextReport)}
-                                         className="flex-1 justify-end gap-3 h-14 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-all group"
-                                       >
-                                          <div className="text-right">
-                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Pertemuan Selanjutnya</p>
-                                             <p className="text-xs font-black text-slate-700 truncate max-w-[150px]">Week {nextReport.lessonWeek}: {nextReport.lessonName}</p>
-                                          </div>
-                                          <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary group-hover:text-white transition-all">
-                                             <ChevronRight className="w-4 h-4 text-primary group-hover:text-white" />
-                                          </div>
-                                       </Button>
-                                    )}
-                                 </div>
-                              );
-                           })()}
-                        </div>
+                       </div>
                     </div>
                  </div>
               ) : (
-                 <div className="h-full flex flex-col items-center justify-center py-20 text-center space-y-6">
-                    <div className="bg-slate-50 p-8 rounded-full">
-                       <PlayCircle className="w-16 h-16 text-slate-200" />
-                    </div>
-                    <div>
-                       <h3 className="text-xl font-black text-slate-900">Pilih Pertemuan</h3>
-                       <p className="text-slate-500 font-medium">Klik salah satu minggu di daftar sebelah kanan untuk melihat detail laporan aktivitas.</p>
-                    </div>
-                 </div>
+                <div className="h-full flex flex-col items-center justify-center py-20 text-center space-y-6">
+                   <div className="bg-slate-50 p-8 rounded-full"><PlayCircle className="w-16 h-16 text-slate-200" /></div>
+                   <div>
+                      <h3 className="text-xl font-black text-slate-900">Pilih Pertemuan</h3>
+                      <p className="text-slate-500 font-medium">Klik salah satu minggu di daftar sebelah kanan untuk melihat detail laporan aktivitas.</p>
+                   </div>
+                </div>
               )}
            </div>
         </main>
 
-        {/* Right Sidebar List */}
-        <aside 
-          className={`fixed inset-y-0 right-0 w-full sm:w-[350px] bg-white border-l border-slate-200 z-[60] transform transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        >
+        <aside className={`fixed inset-y-0 right-0 w-full sm:w-[350px] bg-white border-l border-slate-200 z-[60] transform transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
            <div className="h-full flex flex-col bg-white">
-              <div className="p-5 border-b border-slate-100">
-                 <div className="flex items-center justify-between mb-4 lg:mb-0">
-                    <h2 className="font-black text-slate-900 tracking-tight">Daftar pertemuan</h2>
-                    <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="lg:hidden rounded-full">
-                       <ChevronRight className="w-5 h-5" />
-                    </Button>
-                 </div>
-                 
-                 {/* Mobile direct back button */}
-                 <Button 
-                   variant="outline" 
-                   size="sm" 
-                   onClick={() => {
-                      setViewMode('dashboard');
-                      setIsSidebarOpen(false);
-                   }}
-                   className="w-full lg:hidden rounded-xl border-slate-200 text-slate-600 font-bold gap-2 mb-2"
-                 >
-                    <LayoutDashboard className="w-4 h-4" />
-                    Kembali ke Aktivitas Belajar
-                 </Button>
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h2 className="font-black text-slate-900 tracking-tight">Daftar pertemuan</h2>
+                <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="lg:hidden rounded-full"><ChevronRight className="w-5 h-5" /></Button>
               </div>
-              
               <div className="p-5 bg-slate-50/50 border-b border-slate-100">
                  <div className="flex justify-between items-end mb-2">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Progress Level</span>
@@ -713,29 +633,19 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
                  </div>
                  <Progress value={progressPercent} className="h-2 bg-slate-200 shadow-inner" />
               </div>
-
               <ScrollArea className="flex-1">
                  <div className="p-2 space-y-1">
                     <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full">
                        <AccordionItem value="item-1" className="border-none">
                           <AccordionTrigger className="hover:no-underline px-3 py-4 rounded-xl hover:bg-slate-50 group">
                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-data-[state=open]:bg-blue-600 group-data-[state=open]:text-white transition-colors">
-                                   <FolderOpen className="w-4 h-4" />
-                                </div>
-                                <span className="font-bold text-sm text-slate-700">Tahap Awal (W1-8)</span>
+                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-data-[state=open]:bg-blue-600 group-data-[state=open]:text-white transition-colors"><FolderOpen className="w-4 h-4" /></div>
+                                <span className="font-bold text-sm text-slate-700">Tahap Awal (W{sW}-{mW})</span>
                              </div>
                           </AccordionTrigger>
                           <AccordionContent className="pt-1 pb-2 px-2 space-y-1">
                              {reportsA.length > 0 ? reportsA.map(r => (
-                                <button 
-                                  key={r.id}
-                                  onClick={() => {
-                                     setSelectedReport(r);
-                                     if (window.innerWidth < 1024) setIsSidebarOpen(false);
-                                  }}
-                                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === r.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}
-                                >
+                                <button key={r.id} onClick={() => { setSelectedReport(r); if (window.innerWidth < 1024) setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === r.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}>
                                    <div className={`w-2 h-2 rounded-full shrink-0 ${selectedReport?.id === r.id ? 'bg-primary' : 'bg-slate-200'}`} />
                                    <div className="min-w-0">
                                       <p className="text-xs font-black leading-tight mb-1">Week {r.lessonWeek}</p>
@@ -745,26 +655,16 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
                              )) : <div className="p-4 text-[10px] text-center italic text-slate-400">Belum ada modul terisi</div>}
                           </AccordionContent>
                        </AccordionItem>
-
                        <AccordionItem value="item-2" className="border-none">
                           <AccordionTrigger className="hover:no-underline px-3 py-4 rounded-xl hover:bg-slate-50 group">
                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg group-data-[state=open]:bg-indigo-600 group-data-[state=open]:text-white transition-colors">
-                                   <FolderOpen className="w-4 h-4" />
-                                </div>
-                                <span className="font-bold text-sm text-slate-700">Tahap Lanjut (W9-16)</span>
+                                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg group-data-[state=open]:bg-indigo-600 group-data-[state=open]:text-white transition-colors"><FolderOpen className="w-4 h-4" /></div>
+                                <span className="font-bold text-sm text-slate-700">Tahap Lanjut (W{nmW}-{eW})</span>
                              </div>
                           </AccordionTrigger>
                           <AccordionContent className="pt-1 pb-2 px-2 space-y-1">
                              {reportsB.length > 0 ? reportsB.map(r => (
-                                <button 
-                                  key={r.id}
-                                  onClick={() => {
-                                     setSelectedReport(r);
-                                     if (window.innerWidth < 1024) setIsSidebarOpen(false);
-                                  }}
-                                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === r.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}
-                                >
+                                <button key={r.id} onClick={() => { setSelectedReport(r); if (window.innerWidth < 1024) setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === r.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}>
                                    <div className={`w-2 h-2 rounded-full shrink-0 ${selectedReport?.id === r.id ? 'bg-primary' : 'bg-slate-200'}`} />
                                    <div className="min-w-0">
                                       <p className="text-xs font-black leading-tight mb-1">Week {r.lessonWeek}</p>
@@ -780,33 +680,20 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
            </div>
         </aside>
 
-        {/* Sidebar Toggle Toggle Button (Floating Hook) */}
         {!isSidebarOpen && (
-           <Button 
-             onClick={() => setIsSidebarOpen(true)}
-             className="fixed right-0 top-1/2 -translate-y-1/2 h-14 w-10 p-0 rounded-l-2xl bg-white border border-slate-200 border-r-0 shadow-xl z-50 text-slate-600 hover:bg-slate-50 hidden lg:flex items-center justify-center"
-           >
+           <Button onClick={() => setIsSidebarOpen(true)} className="fixed right-0 top-1/2 -translate-y-1/2 h-14 w-10 p-0 rounded-l-2xl bg-white border border-slate-200 border-r-0 shadow-xl z-50 text-slate-600 hover:bg-slate-50 hidden lg:flex items-center justify-center">
               <PanelRightOpen className="w-5 h-5 mx-auto -translate-x-0.5" />
            </Button>
         )}
         {isSidebarOpen && (
-           <Button 
-             onClick={() => setIsSidebarOpen(false)}
-             className="fixed right-[350px] top-1/2 -translate-y-1/2 h-14 w-10 p-0 rounded-l-2xl bg-white border border-slate-200 border-r-0 shadow-xl z-[70] text-slate-600 hover:bg-slate-50 hidden lg:flex items-center justify-center transform transition-all duration-300"
-           >
+           <Button onClick={() => setIsSidebarOpen(false)} className="fixed right-[350px] top-1/2 -translate-y-1/2 h-14 w-10 p-0 rounded-l-2xl bg-white border border-slate-200 border-r-0 shadow-xl z-[70] text-slate-600 hover:bg-slate-50 hidden lg:flex items-center justify-center transform transition-all duration-300">
               <PanelRightClose className="w-5 h-5 mx-auto -translate-x-0.5" />
            </Button>
         )}
-
-        {/* Mobile FAB list toggle */}
-        <Button 
-          onClick={() => setIsSidebarOpen(true)}
-          className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-slate-900 shadow-2xl text-white lg:hidden z-50 animate-bounce"
-        >
+        <Button onClick={() => setIsSidebarOpen(true)} className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-slate-900 shadow-2xl text-white lg:hidden z-50 animate-bounce">
            <Menu className="w-6 h-6" />
         </Button>
       </div>
     </div>
   );
 }
-
