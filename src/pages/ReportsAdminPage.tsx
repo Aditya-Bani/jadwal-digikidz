@@ -213,7 +213,9 @@ function ReportForm({
     setUploading(true);
     await onSubmit(
       {
-        studentName, date, level,
+        studentName: studentName.trim(), 
+        date, 
+        level,
         lessonWeek: parseInt(lessonWeek),
         lessonName, tools, coach, coachComment,
         goalsMateri, activityReportText,
@@ -441,7 +443,9 @@ export default function ReportsAdminPage() {
   );
 
   const filteredReports = reports.filter((r) => {
-    const matchesSearch = !searchStudent || r.studentName.toLowerCase().includes(searchStudent.toLowerCase());
+    const sName = r.studentName.trim().toLowerCase();
+    const query = searchStudent.trim().toLowerCase();
+    const matchesSearch = !searchStudent || sName.includes(query);
     const matchesCoach = filterCoach === 'all' || r.coach === filterCoach;
     return matchesSearch && matchesCoach;
   });
@@ -543,11 +547,12 @@ export default function ReportsAdminPage() {
     setDeletingReportName(name);
   };
 
-  // Group by student untuk folder view
+  // Group by student untuk folder view - gunakan trim agar konsisten
   const grouped: Record<string, typeof filteredReports> = {};
   filteredReports.forEach((r) => {
-    if (!grouped[r.studentName]) grouped[r.studentName] = [];
-    grouped[r.studentName].push(r);
+    const name = r.studentName.trim();
+    if (!grouped[name]) grouped[name] = [];
+    grouped[name].push(r);
   });
   const sortedNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
   const totalPages = Math.ceil(sortedNames.length / REPORTS_PER_PAGE);
