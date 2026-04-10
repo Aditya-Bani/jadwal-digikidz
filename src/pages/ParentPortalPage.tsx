@@ -777,19 +777,16 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
       );
    }
 
-   const currentLvl = levels.find(l => l.level === selectedLevel);
+   const isTrialSession = selectedReport?.lessonWeek === 0;
+   const levelFromSelectedReport = selectedReport?.level?.match(/\d+/)?.[0];
+   const effectiveLevel = selectedLevel ?? (levelFromSelectedReport ? parseInt(levelFromSelectedReport, 10) : null);
+
+   const currentLvl = levels.find(l => l.level === effectiveLevel);
    const reportsA = currentLvl?.halfA || [];
    const reportsB = currentLvl?.halfB || [];
    const totalWeeks = 16;
    const completedWeeks = reportsA.length + reportsB.length;
-   const progressPercent = Math.min(Math.round((completedWeeks / totalWeeks) * 100), 100);
-
-   // Dynamic Week Labels
-   const lvlNum = selectedLevel || 1;
-   const sW = (lvlNum - 1) * 16 + 1;
-   const mW = sW + 7;
-   const nmW = sW + 8;
-   const eW = sW + 15;
+   const progressPercent = isTrialSession ? 100 : Math.min(Math.round((completedWeeks / totalWeeks) * 100), 100);
 
    return (
       <div className="min-h-screen bg-white flex flex-col h-screen overflow-hidden">
@@ -966,45 +963,78 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
                   </div>
                   <ScrollArea className="flex-1">
                      <div className="p-2 space-y-1">
-                        <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full">
-                           <AccordionItem value="item-1" className="border-none">
-                              <AccordionTrigger className="hover:no-underline px-3 py-4 rounded-xl hover:bg-slate-50 group">
-                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-data-[state=open]:bg-blue-600 group-data-[state=open]:text-white transition-colors"><FolderOpen className="w-4 h-4" /></div>
-                                    <span className="font-bold text-sm text-slate-700">Tahap Awal (W{sW}-{mW})</span>
-                                 </div>
-                              </AccordionTrigger>
-                              <AccordionContent className="pt-1 pb-2 px-2 space-y-1">
-                                 {reportsA.length > 0 ? reportsA.map(r => (
-                                    <button key={r.id} onClick={() => { setSelectedReport(r); if (window.innerWidth < 1024) setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === r.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}>
-                                       <div className={`w-2 h-2 rounded-full shrink-0 ${selectedReport?.id === r.id ? 'bg-primary' : 'bg-slate-200'}`} />
+                        <Accordion
+                           type="single"
+                           collapsible
+                           defaultValue={effectiveLevel ? `level-${effectiveLevel}` : (trialReport ? 'trial' : (levels[0] ? `level-${levels[0].level}` : undefined))}
+                           className="w-full"
+                        >
+                           {trialReport && (
+                              <AccordionItem value="trial" className="border-none">
+                                 <AccordionTrigger className="hover:no-underline px-3 py-4 rounded-xl hover:bg-slate-50 group">
+                                    <div className="flex items-center gap-3">
+                                       <div className="p-2 bg-amber-50 text-amber-600 rounded-lg group-data-[state=open]:bg-amber-600 group-data-[state=open]:text-white transition-colors">
+                                          <Sparkles className="w-4 h-4" />
+                                       </div>
+                                       <span className="font-bold text-sm text-slate-700">Trial (W0)</span>
+                                    </div>
+                                 </AccordionTrigger>
+                                 <AccordionContent className="pt-1 pb-2 px-2 space-y-1">
+                                    <button
+                                       key={trialReport.id}
+                                       onClick={() => {
+                                          setSelectedLevel(null);
+                                          setSelectedReport(trialReport);
+                                          if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                                       }}
+                                       className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === trialReport.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}
+                                    >
+                                       <div className={`w-2 h-2 rounded-full shrink-0 ${selectedReport?.id === trialReport.id ? 'bg-primary' : 'bg-slate-200'}`} />
                                        <div className="min-w-0">
-                                          <p className="text-xs font-black leading-tight mb-1">Week {r.lessonWeek}</p>
-                                          <p className="text-[11px] font-bold truncate leading-none">{r.lessonName}</p>
+                                          <p className="text-xs font-black leading-tight mb-1">Week 0</p>
+                                          <p className="text-[11px] font-bold truncate leading-none">{trialReport.lessonName}</p>
                                        </div>
                                     </button>
-                                 )) : <div className="p-4 text-[10px] text-center italic text-slate-400">Belum ada modul terisi</div>}
-                              </AccordionContent>
-                           </AccordionItem>
-                           <AccordionItem value="item-2" className="border-none">
-                              <AccordionTrigger className="hover:no-underline px-3 py-4 rounded-xl hover:bg-slate-50 group">
-                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg group-data-[state=open]:bg-indigo-600 group-data-[state=open]:text-white transition-colors"><FolderOpen className="w-4 h-4" /></div>
-                                    <span className="font-bold text-sm text-slate-700">Tahap Lanjut (W{nmW}-{eW})</span>
-                                 </div>
-                              </AccordionTrigger>
-                              <AccordionContent className="pt-1 pb-2 px-2 space-y-1">
-                                 {reportsB.length > 0 ? reportsB.map(r => (
-                                    <button key={r.id} onClick={() => { setSelectedReport(r); if (window.innerWidth < 1024) setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === r.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}>
-                                       <div className={`w-2 h-2 rounded-full shrink-0 ${selectedReport?.id === r.id ? 'bg-primary' : 'bg-slate-200'}`} />
-                                       <div className="min-w-0">
-                                          <p className="text-xs font-black leading-tight mb-1">Week {r.lessonWeek}</p>
-                                          <p className="text-[11px] font-bold truncate leading-none">{r.lessonName}</p>
+                                 </AccordionContent>
+                              </AccordionItem>
+                           )}
+
+                           {levels.map((lvl) => {
+                              const allInLevel = [...lvl.halfA, ...lvl.halfB].sort((a, b) => a.lessonWeek - b.lessonWeek);
+                              return (
+                                 <AccordionItem key={lvl.level} value={`level-${lvl.level}`} className="border-none">
+                                    <AccordionTrigger className="hover:no-underline px-3 py-4 rounded-xl hover:bg-slate-50 group">
+                                       <div className="flex items-center gap-3">
+                                          <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-data-[state=open]:bg-blue-600 group-data-[state=open]:text-white transition-colors">
+                                             <FolderOpen className="w-4 h-4" />
+                                          </div>
+                                          <span className="font-bold text-sm text-slate-700">Level {lvl.level}</span>
                                        </div>
-                                    </button>
-                                 )) : <div className="p-4 text-[10px] text-center italic text-slate-400">Belum ada modul terisi</div>}
-                              </AccordionContent>
-                           </AccordionItem>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pt-1 pb-2 px-2 space-y-1">
+                                       {allInLevel.length > 0 ? allInLevel.map(r => (
+                                          <button
+                                             key={r.id}
+                                             onClick={() => {
+                                                setSelectedLevel(lvl.level);
+                                                setSelectedReport(r);
+                                                if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                                             }}
+                                             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${selectedReport?.id === r.id ? 'bg-primary/10 text-primary shadow-sm border border-primary/10' : 'hover:bg-slate-50 text-slate-500'}`}
+                                          >
+                                             <div className={`w-2 h-2 rounded-full shrink-0 ${selectedReport?.id === r.id ? 'bg-primary' : 'bg-slate-200'}`} />
+                                             <div className="min-w-0">
+                                                <p className="text-xs font-black leading-tight mb-1">Week {r.lessonWeek}</p>
+                                                <p className="text-[11px] font-bold truncate leading-none">{r.lessonName}</p>
+                                             </div>
+                                          </button>
+                                       )) : (
+                                          <div className="p-4 text-[10px] text-center italic text-slate-400">Belum ada modul terisi</div>
+                                       )}
+                                    </AccordionContent>
+                                 </AccordionItem>
+                              );
+                           })}
                         </Accordion>
                      </div>
                   </ScrollArea>
