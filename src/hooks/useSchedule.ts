@@ -19,25 +19,12 @@ interface DbScheduleEntry {
 
 function dbToApp(row: DbScheduleEntry): ScheduleEntry {
   let notes = row.notes || undefined;
-  let updatedBy = row.updated_by || undefined;
   let isActive = true;
   const inactiveReason = row.notes?.match(/\[INACTIVE:?(.*?)\]/)?.[1] || undefined;
 
-  // Zero-Migration Hack 1: Extract Inactive Status & Reason
   if (notes && notes.includes('[INACTIVE')) {
     isActive = false;
     notes = notes.replace(/\[INACTIVE:?.*?\]\s*/g, '').trim() || undefined;
-  }
-
-  // Zero-Migration Hack 2: Extract updated_by from notes AND ALWAYS STRIP it from notes
-  if (notes && notes.includes('✍️')) {
-    const parts = notes.split('✍️');
-    if (parts.length > 1) {
-      if (!updatedBy) {
-        updatedBy = parts[parts.length - 1].trim();
-      }
-      notes = parts.slice(0, -1).join('✍️').trim() || undefined;
-    }
   }
 
   return {
@@ -49,7 +36,7 @@ function dbToApp(row: DbScheduleEntry): ScheduleEntry {
     time: row.time as TimeSlot,
     isActive,
     notes: notes,
-    updatedBy: updatedBy,
+    updatedBy: row.updated_by || undefined,
     updatedAt: row.updated_at,
   };
 }
@@ -62,21 +49,10 @@ export function useSchedule() {
   const { toast } = useToast();
 
   const fetchSchedule = useCallback(async () => {
-    let { data, error } = await supabase
+    const { data, error } = await supabase
       .from('schedule_entries')
       .select('*')
       .order('time', { ascending: true });
-
-    // Fallback if updated_by column is missing or schema cache is stale
-    if (error && (error.code === '42703' || error.code === 'PGRST204' || error.message?.includes('updated_by'))) {
-      const fallback = await supabase
-        .from('schedule_entries')
-        .select('id, student_name, coach, level, day, time, notes, created_at, updated_at')
-        .order('time', { ascending: true });
-      data = fallback.data;
-      error = fallback.error;
-    }
-
 
     if (error) {
       console.error('Error fetching schedule:', error);
@@ -89,8 +65,7 @@ export function useSchedule() {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setSchedule((data || []).map((row: any) => dbToApp(row as DbScheduleEntry)));
+    setSchedule((data || []).map((row) => dbToApp(row as DbScheduleEntry)));
     setLoading(false);
   }, [toast]);
 
@@ -99,7 +74,6 @@ export function useSchedule() {
   useEffect(() => {
     fetchSchedule();
 
-    // Realtime subscription
     const channel = supabase
       .channel('schedule-realtime')
       .on(
@@ -122,63 +96,49 @@ export function useSchedule() {
       finalNotes = `[INACTIVE] ${finalNotes}`.trim();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const insertData: any = {
+    const insertPayload = {
       student_name: entry.studentName,
       coach: entry.coach,
       level: entry.level,
       day: entry.day,
       time: entry.time,
       notes: finalNotes || null,
+      updated_by: entry.updatedBy || null,
       updated_at: new Date().toISOString(),
     };
 
-    // Only add updated_by if we're reasonably sure it exists or just try and handle error
-    // For now, let's try to insert with it, and if it fails with 'column does not exist', try without it
     const { data, error } = await supabase
       .from('schedule_entries')
-      .insert({ ...insertData, updated_by: entry.updatedBy || null })
+      .insert(insertPayload)
       .select()
       .single();
 
     if (error) {
-      console.warn('Original addEntry error:', error);
-      if (error.message?.includes('column "updated_by" of relation "schedule_entries" does not exist') ||
-        error.message?.includes('updated_by') ||
+      // Fallback: if updated_by column doesn't exist yet (migration not run), retry without it
+      const isMissingColumn =
         error.code === '42703' ||
-        error.code === 'PGRST204') {
+        error.code === 'PGRST204' ||
+        error.message?.toLowerCase().includes('updated_by');
 
-        const notesWithAudit = entry.updatedBy
-          ? (entry.notes ? `${entry.notes}\n✍️ ${entry.updatedBy}` : `✍️ ${entry.updatedBy}`)
-          : entry.notes;
-
+      if (isMissingColumn) {
+        const { updated_by, ...payloadWithoutAudit } = insertPayload;
         const { data: retryData, error: retryError } = await supabase
           .from('schedule_entries')
-          .insert({ ...insertData, notes: notesWithAudit })
+          .insert(payloadWithoutAudit)
           .select()
           .single();
 
-
         if (retryError) {
           console.error('Error adding entry (retry):', retryError);
-          toast({
-            title: 'Error (Retry)',
-            description: `Gagal: ${retryError.message} (${retryError.code})`,
-            variant: 'destructive',
-          });
+          toast({ title: 'Error', description: `Gagal menambahkan jadwal: ${retryError.message}`, variant: 'destructive' });
           return;
         }
-        setSchedule((prev) => [...prev, dbToApp({ ...retryData, updated_by: entry.updatedBy } as DbScheduleEntry)]);
-
+        setSchedule((prev) => [...prev, dbToApp({ ...retryData, updated_by: entry.updatedBy ?? null } as DbScheduleEntry)]);
         return;
       }
 
       console.error('Error adding entry:', error);
-      toast({
-        title: 'Error',
-        description: `Gagal menambahkan jadwal: ${error.message} (${error.code})`,
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: `Gagal menambahkan jadwal: ${error.message}`, variant: 'destructive' });
       return;
     }
 
@@ -189,19 +149,18 @@ export function useSchedule() {
     const existingEntry = schedule.find(e => e.id === id);
     if (!existingEntry) return;
 
-    const dbUpdates: Record<string, unknown> = {};
+    const dbUpdates: Record<string, any> = {};
     if (updates.studentName !== undefined) dbUpdates.student_name = updates.studentName;
     if (updates.coach !== undefined) dbUpdates.coach = updates.coach;
     if (updates.level !== undefined) dbUpdates.level = updates.level;
     if (updates.day !== undefined) dbUpdates.day = updates.day;
     if (updates.time !== undefined) dbUpdates.time = updates.time;
+    if (updates.updatedBy !== undefined) dbUpdates.updated_by = updates.updatedBy;
 
-    // Determine the base notes (what the user typed, ignoring internal tags)
     const baseNotes = updates.notes !== undefined ? updates.notes : existingEntry.notes;
     const finalIsActive = updates.isActive !== undefined ? updates.isActive : existingEntry.isActive;
     const finalReason = updates.inactiveReason !== undefined ? updates.inactiveReason : existingEntry.inactiveReason;
 
-    // Inject or remove [INACTIVE]
     let finalNotes = baseNotes || '';
     if (!finalIsActive) {
       const tag = finalReason ? `[INACTIVE:${finalReason}]` : '[INACTIVE]';
@@ -211,57 +170,42 @@ export function useSchedule() {
     dbUpdates.notes = finalNotes || null;
     dbUpdates.updated_at = new Date().toISOString();
 
-    // Attempt with updated_by first
-    const dbUpdatesWithAudit = { ...dbUpdates };
-    if (updates.updatedBy !== undefined) dbUpdatesWithAudit.updated_by = updates.updatedBy;
-
     const { data, error } = await supabase
       .from('schedule_entries')
-      .update(dbUpdatesWithAudit)
+      .update(dbUpdates)
       .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      if (error.message?.includes('column "updated_by" of relation "schedule_entries" does not exist') ||
-        error.message?.includes('updated_by') ||
+      // Fallback: if updated_by column doesn't exist yet (migration not run), retry without it
+      const isMissingColumn =
         error.code === '42703' ||
-        error.code === 'PGRST204') {
+        error.code === 'PGRST204' ||
+        error.message?.toLowerCase().includes('updated_by');
 
-        const targetNotes = finalNotes;
-        const notesWithAudit = updates.updatedBy
-          ? (targetNotes ? `${targetNotes}\n✍️ ${updates.updatedBy}` : `✍️ ${updates.updatedBy}`)
-          : targetNotes;
-
+      if (isMissingColumn) {
+        const { updated_by, ...dbUpdatesWithoutAudit } = dbUpdates;
         const { data: retryData, error: retryError } = await supabase
           .from('schedule_entries')
-          .update({ ...dbUpdates, notes: notesWithAudit || null })
+          .update(dbUpdatesWithoutAudit)
           .eq('id', id)
           .select()
           .single();
 
         if (retryError) {
           console.error('Error updating entry (retry):', retryError);
-          toast({
-            title: 'Error',
-            description: 'Gagal memperbarui jadwal.',
-            variant: 'destructive',
-          });
+          toast({ title: 'Error', description: 'Gagal memperbarui jadwal.', variant: 'destructive' });
           return;
         }
-
         setSchedule((prev) =>
-          prev.map((entry) => (entry.id === id ? dbToApp({ ...retryData, updated_by: updates.updatedBy } as DbScheduleEntry) : entry))
+          prev.map((entry) => (entry.id === id ? dbToApp({ ...retryData, updated_by: updates.updatedBy ?? null } as DbScheduleEntry) : entry))
         );
         return;
       }
 
       console.error('Error updating entry:', error);
-      toast({
-        title: 'Error',
-        description: 'Gagal memperbarui jadwal.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Gagal memperbarui jadwal.', variant: 'destructive' });
       return;
     }
 

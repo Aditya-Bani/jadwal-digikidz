@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { useCertificates, StudentCertificate } from '@/hooks/useCertificates';
-import { uploadReportMedia } from '@/hooks/useActivityReports'; // Reuse upload hook since we just need URL from storage
+import { uploadReportMedia, useActivityReports } from '@/hooks/useActivityReports';
+import { groupReportsByLevel } from '@/lib/levelUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { LEVELS } from '@/types/schedule';
-import { Search, Plus, Trash2, FileText, Upload, GraduationCap, Download, Eye, RefreshCw } from 'lucide-react';
+import { Search, Plus, Trash2, FileText, Upload, GraduationCap, Download, Eye, RefreshCw, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -80,9 +81,108 @@ const getCertificatePreviewIssueMessage = (issue: CertificatePreviewIssue) => {
   }
 };
 
+// ─── Certificate Status Panel ────────────────────────────────────────────────
+// Detects students who have completed levels (based on activity reports)
+// but are missing their certificates.
+
+interface StudentCertStatus {
+  studentName: string;
+  completedLevels: number[];
+  missingLevels: number[];
+  hasCertForLevel: (level: number) => boolean;
+  certCount: number;
+}
+
 export default function CertificatesAdminPage() {
   const { certificates, loading, addCertificate, deleteCertificate } = useCertificates();
+  const { reports, loading: reportsLoading } = useActivityReports();
+  const [statusPanelExpanded, setStatusPanelExpanded] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'missing' | 'complete'>('missing');
+
+  // Build status list from the UNION of students in activity_reports AND certificates.
+  // Uses case-insensitive name normalization so "Neil", "neil", "Neil " all map to one entry.
+  const certStatusList = useMemo<StudentCertStatus[]>(() => {
+    if (reportsLoading) return [];
+
+    // Build a map: normalizedKey (lowercase+trim) → canonical display name
+    // Reports take priority for the display name; certs are added if not already present.
+    const canonicalNames = new Map<string, string>();
+    reports.forEach(r => {
+      const key = r.studentName.trim().toLowerCase();
+      if (!canonicalNames.has(key)) canonicalNames.set(key, r.studentName.trim());
+    });
+    certificates.forEach(c => {
+      const key = c.studentName.trim().toLowerCase();
+      if (!canonicalNames.has(key)) canonicalNames.set(key, c.studentName.trim());
+    });
+
+    return Array.from(canonicalNames.entries()).map(([nameKey, displayName]) => {
+      // Match reports and certs using the normalized key (case-insensitive)
+      const studentReports = reports.filter(
+        r => r.studentName.trim().toLowerCase() === nameKey
+      );
+      const studentCerts = certificates.filter(
+        c => c.studentName.trim().toLowerCase() === nameKey
+      );
+
+      const { levels } = groupReportsByLevel(studentReports);
+
+      // A level is "completed" if it has at least 8 reports
+      const completedLevels = levels
+        .filter(lvl => (lvl.halfA.length + lvl.halfB.length) >= 8)
+        .map(lvl => lvl.level);
+
+      // Helper: does a specific curriculum level number have a certificate?
+      const hasCertForLevel = (levelNum: number) => {
+        return studentCerts.some(cert => {
+          try {
+            // Cert stored as JSON: { level: "Level 1", jenjang: "Teenager 2" }
+            // Match against parsed.level ("Level 1" → 1), NOT jenjang ("Teenager 2" → 2)
+            const parsed = JSON.parse(cert.level);
+            const certLevelStr = parsed.level || cert.level;
+            const match = certLevelStr.match(/\d+/);
+            return match ? parseInt(match[0], 10) === levelNum : false;
+          } catch {
+            // Fallback for plain strings like "Level 1" or "1"
+            const match = cert.level.match(/\d+/);
+            return match ? parseInt(match[0], 10) === levelNum : false;
+          }
+        });
+      };
+
+      const missingLevels = completedLevels.filter(lvl => !hasCertForLevel(lvl));
+
+      return {
+        studentName: displayName,
+        completedLevels,
+        missingLevels,
+        hasCertForLevel,
+        certCount: studentCerts.length,
+      };
+    })
+    .sort((a, b) => {
+      if (b.missingLevels.length !== a.missingLevels.length) return b.missingLevels.length - a.missingLevels.length;
+      return a.studentName.localeCompare(b.studentName);
+    });
+  }, [reports, certificates, reportsLoading]);
+
+  const filteredStatusList = useMemo(() => {
+    if (statusFilter === 'missing') {
+      // Students who have completed levels but at least one cert is missing
+      return certStatusList.filter(s => s.missingLevels.length > 0);
+    }
+    if (statusFilter === 'complete') {
+      // Students who have at least one certificate uploaded AND no missing certs
+      // (certCount > 0 catches students with certs but < 8 reports)
+      return certStatusList.filter(s => s.certCount > 0 && s.missingLevels.length === 0);
+    }
+    return certStatusList; // 'all' — everyone
+  }, [certStatusList, statusFilter]);
+
+  const totalMissing = certStatusList.filter(s => s.missingLevels.length > 0).length;
+  const totalComplete = certStatusList.filter(s => s.certCount > 0 && s.missingLevels.length === 0).length;
   const { toast } = useToast();
+
 
   const [studentName, setStudentName] = useState('');
   const [levelLulus, setLevelLulus] = useState('');
@@ -404,7 +504,182 @@ export default function CertificatesAdminPage() {
               )}
             </div>
           </div>
-          
+        </div>
+
+        {/* ── Certificate Status Panel ── */}
+        <div className="mt-8 border border-border/50 bg-card rounded-3xl shadow-sm overflow-hidden">
+          {/* Header */}
+          <button
+            onClick={() => setStatusPanelExpanded(v => !v)}
+            className="w-full flex items-center justify-between p-6 hover:bg-muted/20 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 rounded-xl">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+              </div>
+              <div className="text-left">
+                <h2 className="text-lg font-black text-foreground">Status Sertifikat Murid</h2>
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">
+                  Murid yang sudah naik level berdasarkan activity report
+                </p>
+              </div>
+              {totalMissing > 0 && (
+                <span className="ml-2 px-2.5 py-1 rounded-full text-[11px] font-black bg-red-100 text-red-600 border border-red-200">
+                  {totalMissing} belum lengkap
+                </span>
+              )}
+              {totalMissing === 0 && certStatusList.length > 0 && (
+                <span className="ml-2 px-2.5 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">
+                  ✓ Semua lengkap
+                </span>
+              )}
+            </div>
+            {statusPanelExpanded ? (
+              <ChevronUp className="w-5 h-5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+            )}
+          </button>
+
+          {statusPanelExpanded && (
+            <div className="px-6 pb-6 space-y-4">
+              {/* Filter pills */}
+              <div className="flex gap-2 flex-wrap">
+                {(['missing', 'complete', 'all'] as const).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setStatusFilter(f)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-black border transition-all ${
+                      statusFilter === f
+                        ? f === 'missing'
+                          ? 'bg-red-500 text-white border-red-500'
+                          : f === 'complete'
+                          ? 'bg-emerald-500 text-white border-emerald-500'
+                          : 'bg-primary text-white border-primary'
+                        : 'bg-muted text-muted-foreground border-border hover:bg-muted/80'
+                    }`}
+                  >
+                    {f === 'missing' ? `❌ Belum Lengkap (${totalMissing})` : f === 'complete' ? `✓ Sudah Lengkap (${totalComplete})` : `Semua (${certStatusList.length})`}
+                  </button>
+                ))}
+              </div>
+
+              {reportsLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="border border-border rounded-2xl p-4 space-y-2 animate-pulse">
+                      <div className="h-4 bg-muted rounded-full w-3/4" />
+                      <div className="h-3 bg-muted rounded-full w-1/2" />
+                      <div className="flex gap-1.5 mt-2">
+                        {[...Array(3)].map((_, j) => <div key={j} className="h-7 w-7 bg-muted rounded-lg" />)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : filteredStatusList.length === 0 ? (
+                <div className="py-10 text-center text-muted-foreground">
+                  <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-emerald-400" />
+                  <p className="font-bold text-sm">
+                    {statusFilter === 'missing' ? 'Tidak ada murid yang kekurangan sertifikat!' : 'Tidak ada data untuk filter ini.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {filteredStatusList.map(student => (
+                    <div
+                      key={student.studentName}
+                      className={`rounded-2xl p-4 border transition-all ${
+                        student.missingLevels.length > 0
+                          ? 'bg-red-50/50 border-red-200'
+                          : student.certCount > 0
+                          ? 'bg-emerald-50/50 border-emerald-200'
+                          : 'bg-slate-50/80 border-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <div>
+                          <p className="font-black text-sm text-foreground">{student.studentName}</p>
+                          <p className="text-[10px] text-muted-foreground font-medium mt-0.5">
+                            {student.certCount > 0
+                              ? `${student.certCount} sertifikat · ${student.completedLevels.length} level selesai`
+                              : student.completedLevels.length > 0
+                              ? `${student.completedLevels.length} level selesai`
+                              : 'Masih dalam progress'}
+                          </p>
+                        </div>
+                        {student.missingLevels.length > 0 ? (
+                          <span className="shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">
+                            {student.missingLevels.length} kurang
+                          </span>
+                        ) : student.certCount > 0 ? (
+                          <span className="shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">
+                            ✓ Lengkap
+                          </span>
+                        ) : (
+                          <span className="shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                            In Progress
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Level chips — from completed activity report levels */}
+                      {student.completedLevels.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-1.5">
+                          {student.completedLevels.map(lvl => {
+                            const hasCert = student.hasCertForLevel(lvl);
+                            return (
+                              <div
+                                key={lvl}
+                                title={hasCert ? `Level ${lvl}: Sertifikat sudah ada` : `Level ${lvl}: Sertifikat BELUM diupload`}
+                                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-black border transition-all ${
+                                  hasCert
+                                    ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                                    : 'bg-red-100 text-red-600 border-red-300 border-dashed'
+                                }`}
+                              >
+                                {hasCert ? (
+                                  <CheckCircle2 className="w-3 h-3" />
+                                ) : (
+                                  <AlertTriangle className="w-3 h-3" />
+                                )}
+                                Lv {lvl}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* If student has certs but no "completed" levels from reports — show cert chips directly */}
+                      {student.completedLevels.length === 0 && student.certCount > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-1.5">
+                          <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-black border bg-emerald-100 text-emerald-700 border-emerald-300">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {student.certCount} sertifikat
+                          </div>
+                          <span className="text-[10px] text-muted-foreground self-center italic">
+                            (report &lt;8 sesi)
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Quick action */}
+                      {student.missingLevels.length > 0 && (
+                        <button
+                          onClick={() => {
+                            setStudentName(student.studentName);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="mt-2 w-full text-[10px] font-black py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                        >
+                          Upload Sertifikat →
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
 

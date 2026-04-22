@@ -908,6 +908,13 @@ export default function ReportsAdminPage() {
 
               const { levels, trialReport } = groupReportsByLevel(studentReports);
 
+              // Compute missing weeks per level
+              const getMissingWeeks = (lvl: typeof levels[0]) => {
+                const uploaded = new Set([...lvl.halfA, ...lvl.halfB].map(r => r.lessonWeek));
+                const allWeeks = Array.from({ length: lvl.end - lvl.start + 1 }, (_, i) => lvl.start + i);
+                return allWeeks.filter(w => !uploaded.has(w));
+              };
+
               return (
                 <div className="mt-4 space-y-3 pb-20">
                   <div className="flex items-center justify-between bg-card p-4 rounded-2xl border border-border/50 shadow-sm">
@@ -921,6 +928,134 @@ export default function ReportsAdminPage() {
                       </div>
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => setOpenFolder(null)} className="rounded-xl hover:bg-destructive/10 hover:text-destructive transition-colors">Tutup</Button>
+                  </div>
+
+                  {/* ── Missing Weeks Tracker ── */}
+                  <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-center gap-2">
+                      <CalendarRange className="w-5 h-5 text-primary" />
+                      <h4 className="font-black text-sm uppercase tracking-widest text-foreground">Tracker Minggu Belum Di-upload</h4>
+                    </div>
+
+                    {levels.length === 0 && !trialReport && (
+                      <p className="text-xs text-muted-foreground italic">Belum ada data level untuk murid ini.</p>
+                    )}
+
+                    <div className="space-y-5">
+                      {levels.map((lvl) => {
+                        const uploadedWeeks = new Set([...lvl.halfA, ...lvl.halfB].map(r => r.lessonWeek));
+                        const allWeeks = Array.from({ length: lvl.end - lvl.start + 1 }, (_, i) => lvl.start + i);
+                        const missingWeeks = allWeeks.filter(w => !uploadedWeeks.has(w));
+                        const uploadedCount = uploadedWeeks.size;
+                        const totalWeeks = allWeeks.length;
+                        const progressPct = Math.round((uploadedCount / totalWeeks) * 100);
+
+                        return (
+                          <div key={lvl.level} className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-black text-foreground uppercase tracking-widest">Level {lvl.level}</span>
+                                <span className="text-[10px] text-muted-foreground">(W{lvl.start}–W{lvl.end})</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-emerald-600">{uploadedCount}/{totalWeeks} di-upload</span>
+                                {missingWeeks.length > 0 && (
+                                  <span className="text-[10px] font-black bg-red-100 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">
+                                    {missingWeeks.length} belum
+                                  </span>
+                                )}
+                                {missingWeeks.length === 0 && (
+                                  <span className="text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                    ✓ Lengkap
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Progress bar */}
+                            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{
+                                  width: `${progressPct}%`,
+                                  backgroundColor: progressPct === 100 ? '#10b981' : progressPct >= 50 ? '#f59e0b' : '#ef4444'
+                                }}
+                              />
+                            </div>
+
+                            {/* Week grid */}
+                            <div className="flex flex-wrap gap-1.5">
+                              {allWeeks.map(week => {
+                                const isUploaded = uploadedWeeks.has(week);
+                                const report = [...lvl.halfA, ...lvl.halfB].find(r => r.lessonWeek === week);
+                                return (
+                                  <div
+                                    key={week}
+                                    title={isUploaded ? `Week ${week}: ${report?.lessonName || 'Sudah di-upload'}` : `Week ${week}: Belum di-upload`}
+                                    className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black cursor-default transition-all border ${
+                                      isUploaded
+                                        ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-200'
+                                        : 'bg-red-50 text-red-500 border-red-200 border-dashed'
+                                    }`}
+                                  >
+                                    {week}
+                                    {isUploaded && (
+                                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-600 rounded-full flex items-center justify-center">
+                                        <span className="text-[6px] text-white font-black">✓</span>
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Missing week pills */}
+                            {missingWeeks.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 pt-1">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mr-1 self-center">Belum upload:</span>
+                                {missingWeeks.map(week => (
+                                  <button
+                                    key={week}
+                                    onClick={() => setEditingReport({
+                                      id: '',
+                                      studentName: openFolder,
+                                      date: new Date().toISOString().split('T')[0],
+                                      level: studentReports[0]?.level || '',
+                                      lessonWeek: week,
+                                      lessonName: '',
+                                      tools: '',
+                                      coach: studentReports[0]?.coach || '',
+                                      coachComment: '',
+                                      goalsMateri: '',
+                                      activityReportText: '',
+                                      mediaUrls: [],
+                                      externalLinks: [],
+                                      createdAt: '',
+                                    } as any)}
+                                    title={`Klik untuk upload report Week ${week}`}
+                                    className="text-[10px] font-black px-2.5 py-1 rounded-full bg-red-100 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all cursor-pointer"
+                                  >
+                                    W{week} →
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Legend */}
+                    <div className="flex items-center gap-4 pt-3 border-t border-border/50">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-4 h-4 rounded-md bg-emerald-500 border border-emerald-600" />
+                        <span className="text-[10px] font-bold text-muted-foreground">Sudah di-upload</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-4 h-4 rounded-md bg-red-50 border border-red-200 border-dashed" />
+                        <span className="text-[10px] font-bold text-muted-foreground">Belum di-upload</span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Sesi Trial jika ada */}

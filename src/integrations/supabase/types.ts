@@ -103,6 +103,7 @@ export type Database = {
           student_name: string
           time: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           coach: string
@@ -114,6 +115,7 @@ export type Database = {
           student_name: string
           time: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           coach?: string
@@ -125,6 +127,7 @@ export type Database = {
           student_name?: string
           time?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -146,6 +149,33 @@ export type Database = {
           created_at?: string
           id?: string
           student_name?: string
+        }
+        Relationships: []
+      }
+      programs: {
+        Row: {
+          created_at: string | null
+          id: string
+          max_levels: number
+          name: string
+          updated_at: string | null
+          weeks_per_level: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          max_levels?: number
+          name: string
+          updated_at?: string | null
+          weeks_per_level?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          max_levels?: number
+          name?: string
+          updated_at?: string | null
+          weeks_per_level?: number
         }
         Relationships: []
       }
