@@ -37,7 +37,24 @@ export function CertificatePreviewDialog({ certificate, onClose }: CertificatePr
                   </div>
                 </div>
               ) : isPdf ? (
-                <iframe src={`https://docs.google.com/viewer?url=${encodeURIComponent(resolvedUrl || certificate.fileUrl)}&embedded=true`} className="w-full h-[70vh] sm:h-auto sm:aspect-[1.414/1] bg-white border-none" title="Sertifikat Kelulusan" />
+                <div className="w-full relative" style={{ height: '70vh' }}>
+                  <iframe
+                    src={resolvedUrl || certificate.fileUrl}
+                    className="w-full h-full border-none bg-white"
+                    title="Sertifikat Kelulusan"
+                    onError={() => {/* handled by fallback below */}}
+                  />
+                  {/* Fallback overlay — visible only if iframe fails to render */}
+                  <noscript>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-50 text-slate-500 p-6 text-center">
+                      <p className="font-semibold text-slate-700">Preview tidak tersedia di browser ini</p>
+                      <a href={resolvedUrl || certificate.fileUrl} target="_blank" rel="noopener noreferrer"
+                        className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold">
+                        Buka di Tab Baru
+                      </a>
+                    </div>
+                  </noscript>
+                </div>
               ) : (
                 issue ? (
                   <div className="w-full min-h-[50vh] flex flex-col items-center justify-center gap-3 p-8 text-center text-slate-500">

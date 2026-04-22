@@ -717,8 +717,8 @@ export default function CertificatesAdminPage() {
               </div>
             ) : isPdfUrl(resolvedPreviewUrl || previewCertificate?.fileUrl || '') ? (
               <iframe
-                src={`https://docs.google.com/viewer?url=${encodeURIComponent(resolvedPreviewUrl || previewCertificate?.fileUrl || '')}&embedded=true`}
-                className="w-full h-[70vh] border-none"
+                src={resolvedPreviewUrl || previewCertificate?.fileUrl || ''}
+                className="w-full h-[70vh] border-none bg-white"
                 title="Preview Sertifikat"
               />
             ) : (
