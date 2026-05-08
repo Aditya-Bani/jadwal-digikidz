@@ -6,7 +6,10 @@ import { CalendarDays, LayoutGrid, FileText, Users, LogOut, GraduationCap } from
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+<<<<<<< HEAD
 import { getDisplayName, getInitials } from '@/lib/displayNames';
+=======
+>>>>>>> 68ce707ac85f506956ebd7b8084f56b0fe6c88f3
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,8 +36,21 @@ export function Header() {
   const { signOut, user } = useAuth();
 
   const email = user?.email ?? '';
+<<<<<<< HEAD
   const displayName = getDisplayName(email);
   const initials = getInitials(email);
+=======
+  const rawName = email.split('@')[0];
+  const displayName = rawName
+    .split(/[._-]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+  const initials = rawName
+    .split(/[._-]/)
+    .map((w) => w.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('');
+>>>>>>> 68ce707ac85f506956ebd7b8084f56b0fe6c88f3
 
   const handleLogout = async () => {
     await signOut();

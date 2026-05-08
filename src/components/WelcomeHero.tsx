@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Sparkles } from 'lucide-react';
 import mascotWaving from '@/assets/Mascot Optional CS6-19.png';
+<<<<<<< HEAD
 import { getDisplayName, hasCoachPrefix } from '@/lib/displayNames';
 
 export function WelcomeHero() {
@@ -8,6 +9,17 @@ export function WelcomeHero() {
     const email = user?.email ?? '';
     const displayName = getDisplayName(email);
     const showCoach = hasCoachPrefix(email);
+=======
+
+export function WelcomeHero() {
+    const { user } = useAuth();
+
+    const rawName = user?.email?.split('@')[0] ?? '';
+    const displayName = rawName
+        .split(/[._-]/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+>>>>>>> 68ce707ac85f506956ebd7b8084f56b0fe6c88f3
 
     const hour = new Date().getHours();
     let greeting = 'Selamat Pagi';
@@ -38,7 +50,11 @@ export function WelcomeHero() {
                             {greeting},{' '}
                             <br className="sm:hidden" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-100 to-white">
+<<<<<<< HEAD
                                 {showCoach ? `Coach ${displayName}` : displayName}
+=======
+                                Coach {displayName || ''}
+>>>>>>> 68ce707ac85f506956ebd7b8084f56b0fe6c88f3
                             </span>
                         </h1>
                         <p className="text-blue-100/90 max-w-md text-sm sm:text-base font-medium leading-relaxed mt-2">
