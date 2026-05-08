@@ -1,0 +1,333 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   CLEAN SCHOLAR — Modern & Professional Design System
+   DigiKidz School of Technology
+   ============================================================ */
+
+@layer base {
+  :root {
+    /* ── Core Background ── */
+    --background: 210 40% 98%;
+    /* Slate 50 */
+    --foreground: 222 47% 11%;
+    /* Slate 900 */
+
+    /* ── Card / Surface ── */
+    --card: 0 0% 100%;
+    /* White */
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* ── Primary — Professional Blue ── */
+    --primary: 221 83% 53%;
+    /* Blue 600 */
+    --primary-foreground: 210 40% 98%;
+
+    /* ── Secondary — Soft Slate ── */
+    --secondary: 214 32% 91%;
+    /* Slate 200 */
+    --secondary-foreground: 222 47% 11%;
+
+    /* ── Muted ── */
+    --muted: 214 32% 91%;
+    /* Slate 200 */
+    --muted-foreground: 215 16% 47%;
+    /* Slate 500 */
+
+    /* ── Accent — Warm Amber ── */
+    --accent: 38 92% 50%;
+    /* Amber 500 */
+    --accent-foreground: 0 0% 100%;
+
+    /* ── Destructive ── */
+    --destructive: 0 84% 60%;
+    /* Red 500 */
+    --destructive-foreground: 210 40% 98%;
+
+    /* ── Borders & Inputs ── */
+    --border: 214 32% 91%;
+    /* Slate 200 */
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+    /* Blue 600 */
+
+    /* ── Radius ── */
+    --radius: 1rem;
+
+    /* ── Coach Colors ── */
+    --coach-bani: 221 83% 53%;
+    /* Blue */
+    --coach-argy: 262 83% 58%;
+    /* Purple */
+
+    /* ── Level Colors ── */
+    --level-little-creator: 262 83% 58%;
+    /* Purple */
+    --level-junior: 38 92% 50%;
+    /* Amber */
+    --level-teenager: 340 82% 52%;
+    /* Pink/Rose */
+    --level-trial: 142 71% 45%;
+    /* Green */
+
+    /* ── Sidebar ── */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 214 32% 91%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 221 83% 53%;
+  }
+
+  .dark {
+    /* Clean Scholar also supports a clean dark mode (Slate 900 base) */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 15%;
+    /* Slightly lighter than bg */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 15%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    /* Lighter blue for dark mode */
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 224 76% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@layer components {
+
+  /* ── Schedule Cells ── */
+  .schedule-cell {
+    @apply min-h-[80px] p-2 border-r border-b border-border transition-all duration-200 bg-transparent;
+  }
+
+  .schedule-cell:hover {
+    @apply bg-slate-50 dark:bg-slate-800/50;
+  }
+
+  .schedule-entry {
+    @apply rounded-lg p-2 mb-1 text-sm shadow-sm border transition-all duration-200 cursor-pointer;
+  }
+
+  .schedule-entry:hover {
+    @apply shadow-md transform -translate-y-[1px];
+  }
+
+  /* ── Coach Colors ── */
+  .coach-bani {
+    @apply bg-blue-50/80 border border-blue-100 border-l-4 border-l-blue-500 text-blue-900 dark:bg-blue-900/20 dark:border-blue-800 dark:border-l-blue-500 dark:text-blue-100;
+  }
+
+  .coach-argy {
+    @apply bg-purple-50/80 border border-purple-100 border-l-4 border-l-purple-500 text-purple-900 dark:bg-purple-900/20 dark:border-purple-800 dark:border-l-purple-500 dark:text-purple-100;
+  }
+
+  /* ── Grid Headers ── */
+  .day-header {
+    @apply text-center py-3 font-bold text-sm uppercase tracking-wider text-slate-600 dark:text-slate-300;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .time-slot {
+    @apply text-xs font-semibold py-4 px-2 text-center text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-800/20;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  /* ── Level Badges ── */
+  .level-badge {
+    @apply text-xs px-2.5 py-0.5 rounded-full font-semibold border;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .level-little-creator {
+    @apply bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800;
+  }
+
+  .level-junior {
+    @apply bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800;
+  }
+
+  .level-teenager {
+    @apply bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800;
+  }
+
+  .level-trial {
+    @apply bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800;
+  }
+
+  /* ── Clean Card (Professional) ── */
+  .glass-card {
+    @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    @apply shadow-md border-slate-300 dark:border-slate-700;
+  }
+
+  .glass-amber {
+    @apply bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 shadow-sm dark:from-amber-950/30 dark:to-orange-950/30 dark:border-amber-900;
+  }
+
+  /* ── Animations ── */
+  .pulse-subtle {
+    animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-subtle {
+
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
+  }
+}
+
+/* ============================================================
+   MARQUEE
+   ============================================================ */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: inline-block;
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ============================================================
+   FADE IN
+   ============================================================ */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ============================================================
+   CUSTOM SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  /* slate-300 */
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+  /* slate-600 */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  /* slate-400 */
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+  /* slate-500 */
+}
+
+/* ============================================================
+   SELECTION COLOR
+   ============================================================ */
+
+::selection {
+  background: #dbeafe;
+  /* blue-100 */
+  color: #1e3a8a;
+  /* blue-900 */
+}
+
+.dark ::selection {
+  background: #1e3a8a;
+  /* blue-900 */
+  color: #eff6ff;
+  /* blue-50 */
+}
