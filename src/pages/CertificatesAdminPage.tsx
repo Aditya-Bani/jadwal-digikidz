@@ -298,14 +298,9 @@ export default function CertificatesAdminPage() {
       } else {
         throw new Error(result.error);
       }
-<<<<<<< HEAD
     } catch (error) {
       const err = error as Error;
       toast({ title: 'Gagal', description: err.message || 'Gagal mengupload sertifikat', variant: 'destructive' });
-=======
-    } catch (error: any) {
-      toast({ title: 'Gagal', description: error.message || 'Gagal mengupload sertifikat', variant: 'destructive' });
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
     } finally {
       setUploading(false);
     }
@@ -456,13 +451,9 @@ export default function CertificatesAdminPage() {
                                        const parsed = JSON.parse(cert.level);
                                        certLevel = parsed.level;
                                        certJenjang = parsed.jenjang;
-<<<<<<< HEAD
                                     } catch (error) {
                                        // Ignore error for plain strings
                                     }
-=======
-                                    } catch (e) {}
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
                                     return (
                                        <div className="flex flex-col gap-1 items-start mt-1">
                                          <span className="font-bold text-xs text-foreground bg-primary/10 px-2 py-0.5 rounded-md">

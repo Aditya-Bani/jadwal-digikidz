@@ -41,11 +41,7 @@ import {
 
 const formSchema = z.object({
   studentName: z.string().min(1, 'Nama murid wajib diisi').max(100),
-<<<<<<< HEAD
   coach: z.enum(['Mr. Bani', 'Mr. Argy', 'Ms. Zaura']),
-=======
-  coach: z.enum(['Mr. Bani', 'Mr. Argy']),
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   level: z.enum([
     'Little Creator 1', 'Little Creator 2',
     'Junior 1', 'Junior 2',
@@ -53,14 +49,9 @@ const formSchema = z.object({
   ]),
   day: z.enum(['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu']),
   time: z.enum(['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']),
-<<<<<<< HEAD
   status: z.enum(['active', 'inactive', 'pending']).default('active'),
   inactiveReason: z.string().optional(),
   startDate: z.string().optional(),
-=======
-  isActive: z.boolean().default(true),
-  inactiveReason: z.string().optional(),
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   notes: z.string().max(200).optional(),
 });
 
@@ -91,16 +82,12 @@ export function ScheduleDialog({
       level: 'Little Creator 1',
       day: defaultDay || 'senin',
       time: defaultTime || '08:00',
-<<<<<<< HEAD
       status: 'active',
-=======
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
       notes: '',
     },
   });
 
   useEffect(() => {
-<<<<<<< HEAD
     if (open) {
       if (entry) {
         form.reset({
@@ -136,47 +123,16 @@ export function ScheduleDialog({
       form.setError('startDate', { message: 'Tanggal mulai masuk wajib diisi' });
       return;
     }
-
-=======
-    if (entry) {
-      form.reset({
-        studentName: entry.studentName,
-        coach: entry.coach,
-        level: entry.level,
-        day: entry.day,
-        time: entry.time,
-        isActive: entry.isActive,
-        notes: entry.notes || '',
-      });
-    } else {
-      form.reset({
-        studentName: '',
-        coach: 'Mr. Bani',
-        level: 'Little Creator 1',
-        day: defaultDay || 'senin',
-        time: defaultTime || '08:00',
-        isActive: true,
-        notes: '',
-      });
-    }
-  }, [entry, defaultDay, defaultTime, form]);
-
-  const handleSubmit = (data: FormData) => {
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
     onSave({
       studentName: data.studentName,
       coach: data.coach,
       level: data.level,
       day: data.day,
       time: data.time,
-<<<<<<< HEAD
       isActive: data.status === 'active', // For backwards compatibility
       status: data.status,
       startDate: data.status === 'pending' ? data.startDate : undefined,
       inactiveReason: data.status === 'pending' ? data.startDate : data.inactiveReason,
-=======
-      isActive: data.isActive,
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
       notes: data.notes || undefined,
     });
     onOpenChange(false);
@@ -337,7 +293,6 @@ export function ScheduleDialog({
 
             <FormField
               control={form.control}
-<<<<<<< HEAD
               name="status"
               render={({ field }) => (
                 <FormItem className="rounded-xl border border-border/50 p-3 bg-muted/20 space-y-2.5">
@@ -392,36 +347,11 @@ export function ScheduleDialog({
                         ⚪ Nonaktif
                       </Button>
                     </div>
-=======
-              name="isActive"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-xl border border-border/50 p-3 bg-muted/20">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Keaktifan</FormLabel>
-                    <p className="text-[10px] text-muted-foreground leading-tight">Matikan jika murid sudah tidak lanjut (arsip).</p>
-                  </div>
-                  <FormControl>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className={cn(
-                        "h-8 rounded-lg px-3 transition-all font-bold text-[11px] uppercase tracking-wider",
-                        field.value
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100"
-                          : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100"
-                      )}
-                      onClick={() => field.onChange(!field.value)}
-                    >
-                      {field.value ? '🟢 Aktif' : '⚪ Nonaktif'}
-                    </Button>
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
                   </FormControl>
                 </FormItem>
               )}
             />
 
-<<<<<<< HEAD
             {form.watch('status') === 'pending' && (
               <FormField
                 control={form.control}
@@ -439,9 +369,6 @@ export function ScheduleDialog({
             )}
 
             {form.watch('status') === 'inactive' && (
-=======
-            {!form.watch('isActive') && (
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
               <FormField
                 control={form.control}
                 name="inactiveReason"
@@ -450,11 +377,7 @@ export function ScheduleDialog({
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Alasan Nonaktif</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-<<<<<<< HEAD
                         <SelectTrigger className="bg-slate-50 border-slate-200">
-=======
-                        <SelectTrigger className="bg-amber-50/50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900">
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
                           <SelectValue placeholder="Pilih alasan..." />
                         </SelectTrigger>
                       </FormControl>

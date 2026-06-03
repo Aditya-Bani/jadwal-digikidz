@@ -296,15 +296,8 @@ export function useAccessCodes() {
       p_access_code: code.toUpperCase()
     });
 
-<<<<<<< HEAD
     let data = result.data;
     let error = result.error;
-=======
-    let data: unknown;
-    let error: any;
-    data = result.data;
-    error = result.error;
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
 
     // Smart Fallback: If function doesn't exist yet, use old direct query

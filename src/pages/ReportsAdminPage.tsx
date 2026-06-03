@@ -1,16 +1,9 @@
-<<<<<<< HEAD
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { useActivityReports, useAccessCodes, uploadReportMedia, ActivityReport } from '@/hooks/useActivityReports';
 import { COACHES, LEVELS, Coach } from '@/types/schedule';
 import { useSchedule } from '@/hooks/useSchedule';
 import { useSearchParams } from 'react-router-dom';
-=======
-import { useState } from 'react';
-import { Header } from '@/components/Header';
-import { useActivityReports, useAccessCodes, uploadReportMedia, ActivityReport } from '@/hooks/useActivityReports';
-import { COACHES, LEVELS, Coach } from '@/types/schedule';
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,11 +40,7 @@ function formatWhatsAppMessage(r: {
 }): string {
   const d = new Date(r.date + 'T00:00:00');
   const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-<<<<<<< HEAD
   const coachTitle = r.coach.includes('Bani') ? 'Mr. Bani' : r.coach.includes('Argy') ? 'Mr. Argy' : r.coach.includes('Zaura') ? 'Ms. Zaura' : r.coach;
-=======
-  const coachTitle = r.coach.includes('Bani') ? 'Mr. Bani' : r.coach.includes('Argy') ? 'Mr. Argy' : r.coach;
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   const lessonLabel = r.lessonWeek === 0 ? `Trial` : `Week ${r.lessonWeek}`;
 
   let msg = ``;
@@ -109,11 +98,7 @@ interface ReportCardProps {
 }
 
 function ReportCard({ r, onEdit, onDelete }: ReportCardProps) {
-<<<<<<< HEAD
   const coachClass = r.coach.includes('Bani') ? 'coach-bani' : r.coach.includes('Argy') ? 'coach-argy' : 'coach-zaura';
-=======
-  const coachClass = r.coach.includes('Bani') ? 'coach-bani' : 'coach-argy';
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   return (
     <div className={`glass-card rounded-2xl p-4 border-none shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 schedule-entry ${coachClass}`}>
       <div className="flex items-start justify-between gap-3">
@@ -198,14 +183,9 @@ function ReportForm({
   initial?: Partial<ActivityReport>;
   onSubmit: (data: Omit<ActivityReport, 'id' | 'createdAt'>, files: File[]) => Promise<void>;
   submitLabel: string;
-<<<<<<< HEAD
   onSaveAndShare?: (data: Omit<ActivityReport, 'id' | 'createdAt'>, files: File[], waWindow?: Window | null) => Promise<void>;
 }) {
   const { schedule } = useSchedule();
-=======
-  onSaveAndShare?: (data: Omit<ActivityReport, 'id' | 'createdAt'>, files: File[]) => Promise<void>;
-}) {
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   const [studentName, setStudentName] = useState(initial?.studentName || '');
   const [date, setDate] = useState(initial?.date || '');
   const [level, setLevel] = useState(initial?.level || '');
@@ -221,7 +201,6 @@ function ReportForm({
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
-<<<<<<< HEAD
   // Ambil daftar nama murid aktif unik dari jadwal
   const activeStudentNames = Array.from(
     new Set(
@@ -271,9 +250,6 @@ function ReportForm({
       }
     }
   }, [initial, schedule]);
-
-=======
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   const resetForm = () => {
     setStudentName(''); setDate(''); setLevel(''); setLessonWeek('');
     setLessonName(''); setTools(''); setCoach(''); setCoachComment('');
@@ -289,8 +265,8 @@ function ReportForm({
     setUploading(true);
     await onSubmit(
       {
-        studentName: studentName.trim(), 
-        date, 
+        studentName: studentName.trim(),
+        date,
         level,
         lessonWeek: parseInt(lessonWeek),
         lessonName, tools, coach, coachComment,
@@ -309,7 +285,6 @@ function ReportForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Nama Murid *</Label>
-<<<<<<< HEAD
           <Select value={studentName} onValueChange={handleStudentChange}>
             <SelectTrigger className="bg-background">
               <SelectValue placeholder={dropdownOptions.length > 0 ? "Pilih nama murid" : "Memuat daftar murid..."} />
@@ -322,10 +297,7 @@ function ReportForm({
               ))}
             </SelectContent>
           </Select>
-=======
-          <Input value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Nama murid" />
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
-        </div>
+        </div >
         <div className="space-y-2">
           <Label>Tanggal *</Label>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -356,7 +328,7 @@ function ReportForm({
           <Label>Nama Materi (Lesson) *</Label>
           <Input value={lessonName} onChange={(e) => setLessonName(e.target.value)} placeholder="Nama materi" />
         </div>
-      </div>
+      </div >
       <div className="space-y-2">
         <Label>Tools</Label>
         <Input value={tools} onChange={(e) => setTools(e.target.value)} placeholder="Alat/software yang digunakan" />
@@ -455,11 +427,7 @@ function ReportForm({
               }
 
               setUploading(true);
-<<<<<<< HEAD
               await onSaveAndShare(
-=======
-              await (onSaveAndShare as any)(
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
                 {
                   studentName, date, level,
                   lessonWeek: parseInt(lessonWeek),
@@ -483,7 +451,7 @@ function ReportForm({
           </Button>
         )}
       </div>
-    </div>
+    </div >
   );
 }
 
@@ -493,7 +461,6 @@ export default function ReportsAdminPage() {
   const { reports, loading: reportsLoading, addReport, updateReport, deleteReport } = useActivityReports();
   const { codes, generateCode, deleteCode } = useAccessCodes();
   const { toast } = useToast();
-<<<<<<< HEAD
   const [searchParams] = useSearchParams();
   const initialStudent = searchParams.get('student');
   const [activeTab, setActiveTab] = useState('history');
@@ -503,8 +470,6 @@ export default function ReportsAdminPage() {
       setActiveTab('create');
     }
   }, [initialStudent]);
-=======
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
   const [editingReport, setEditingReport] = useState<ActivityReport | null>(null);
   const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
@@ -666,7 +631,7 @@ export default function ReportsAdminPage() {
     const name = (r.studentName || "").trim();
     // Normalisasi case agar Neil dan neil masuk ke folder yang sama
     const canonicalName = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-    
+
     if (!grouped[canonicalName]) grouped[canonicalName] = [];
     grouped[canonicalName].push(r);
   });
@@ -739,16 +704,9 @@ export default function ReportsAdminPage() {
           </div>
         </div>
 
-<<<<<<< HEAD
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex justify-start overflow-x-hidden">
             <TabsList className="bg-muted/50 p-1 rounded-xl h-auto border border-border/50 flex-wrap justify-start">
-=======
-        <Tabs defaultValue="history" className="space-y-6">
-          <div className="flex justify-start overflow-x-hidden">
-            <TabsList className="bg-muted/50 p-1 rounded-xl h-auto border border-border/50 flex-wrap justify-start">
-
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
               <TabsTrigger value="history" className="px-6 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold gap-2">
                 <Table className="w-4 h-4" /> Riwayat
               </TabsTrigger>
@@ -774,75 +732,71 @@ export default function ReportsAdminPage() {
                 <FileText className="w-5 h-5 text-primary" />
                 Buat Activity Report Baru
               </h2>
-<<<<<<< HEAD
               <ReportForm initial={initialStudent ? { studentName: initialStudent } : undefined} onSubmit={handleCreateReport} submitLabel="Simpan Report" onSaveAndShare={handleCreateAndShare} />
-=======
-              <ReportForm onSubmit={handleCreateReport} submitLabel="Simpan Report" onSaveAndShare={handleCreateAndShare} />
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
-            </div>
-          </TabsContent>
+            </div >
+          </TabsContent >
 
-          {/* ── Tab: Kode Akses ── */}
-          <TabsContent value="codes" className="animate-fade-in">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-1 space-y-6">
-                <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5">
-                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <Plus className="w-4 h-4 text-primary" />
-                    Generate Kode
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Nama Murid</Label>
-                      <Input value={newCodeName} onChange={(e) => setNewCodeName(e.target.value)} placeholder="Masukkan nama murid" className="h-11 rounded-xl" />
-                    </div>
-                    <Button onClick={handleGenerateCode} className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20">
-                      Generate Kode Akses
-                    </Button>
+    {/* ── Tab: Kode Akses ── */ }
+    < TabsContent value = "codes" className = "animate-fade-in" >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 space-y-6">
+          <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Plus className="w-4 h-4 text-primary" />
+              Generate Kode
+            </h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Nama Murid</Label>
+                <Input value={newCodeName} onChange={(e) => setNewCodeName(e.target.value)} placeholder="Masukkan nama murid" className="h-11 rounded-xl" />
+              </div>
+              <Button onClick={handleGenerateCode} className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20">
+                Generate Kode Akses
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-2">
+          <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 min-h-[400px]">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Key className="w-4 h-4 text-primary" />
+              Daftar Kode Akses
+            </h3>
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input value={searchCode} onChange={(e) => setSearchCode(e.target.value)} placeholder="Cari berdasarkan nama murid..." className="pl-9 h-11 rounded-xl" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {filteredCodes.map((c) => (
+                <div key={c.id} className="flex items-center justify-between p-4 rounded-2xl border border-border/50 bg-muted/20 hover:bg-muted/40 transition-colors group">
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm truncate">{c.studentName}</p>
+                    <p className="text-xs text-primary font-mono font-bold tracking-widest mt-0.5 uppercase">{c.accessCode}</p>
+                  </div>
+                  <div className="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary" onClick={() => copyCode(c.accessCode)}><Copy className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive" onClick={() => deleteCode(c.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </div>
-              </div>
-
-              <div className="lg:col-span-2">
-                <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 min-h-[400px]">
-                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <Key className="w-4 h-4 text-primary" />
-                    Daftar Kode Akses
-                  </h3>
-                  <div className="relative mb-6">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input value={searchCode} onChange={(e) => setSearchCode(e.target.value)} placeholder="Cari berdasarkan nama murid..." className="pl-9 h-11 rounded-xl" />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {filteredCodes.map((c) => (
-                      <div key={c.id} className="flex items-center justify-between p-4 rounded-2xl border border-border/50 bg-muted/20 hover:bg-muted/40 transition-colors group">
-                        <div className="min-w-0">
-                          <p className="font-bold text-sm truncate">{c.studentName}</p>
-                          <p className="text-xs text-primary font-mono font-bold tracking-widest mt-0.5 uppercase">{c.accessCode}</p>
-                        </div>
-                        <div className="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary" onClick={() => copyCode(c.accessCode)}><Copy className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive" onClick={() => deleteCode(c.id)}><Trash2 className="h-4 w-4" /></Button>
-                        </div>
-                      </div>
-                    ))}
-                    {filteredCodes.length === 0 && (
-                      <div className="col-span-full">
-                        <EmptyState
-                          title="Pelanggan Tidak Ditemukan"
-                          description="Sepertinya belum ada kode akses untuk siswa ini. Ayo buat satu!"
-                          className="py-10"
-                        />
-                      </div>
-                    )}
-                  </div>
+              ))}
+              {filteredCodes.length === 0 && (
+                <div className="col-span-full">
+                  <EmptyState
+                    title="Pelanggan Tidak Ditemukan"
+                    description="Sepertinya belum ada kode akses untuk siswa ini. Ayo buat satu!"
+                    className="py-10"
+                  />
                 </div>
-              </div>
+              )}
             </div>
-          </TabsContent>
+          </div>
+        </div>
+      </div>
+          </TabsContent >
 
-          {/* ── Tab: Riwayat (Grid view yang baru) ── */}
-          <TabsContent value="history" className="animate-fade-in">
+    {/* ── Tab: Riwayat (Grid view yang baru) ── */ }
+    < TabsContent value = "history" className = "animate-fade-in" >
             <div className="flex justify-end mb-4">
               <Button onClick={exportToCSV} variant="outline" className="gap-2 font-bold shadow-sm shadow-primary/5 hover:bg-primary/5">
                 <Download className="w-4 h-4 text-green-600" />
@@ -904,513 +858,506 @@ export default function ReportsAdminPage() {
                 </table>
               </div>
             </div>
-          </TabsContent>
+          </TabsContent >
 
-          {/* ── Tab: Update Perkembangan Murid (Folder view) ── */}
-          <TabsContent value="update" className="animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="md:col-span-3">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    value={searchStudent}
-                    onChange={(e) => setSearchStudent(e.target.value)}
-                    placeholder="Cari nama murid atau materi..."
-                    className="pl-11 h-12 rounded-2xl bg-card border-none shadow-sm shadow-primary/5 focus-visible:ring-primary"
-                  />
-                </div>
-              </div>
-              <div className="md:col-span-1">
-                <Select value={filterCoach} onValueChange={setFilterCoach}>
-                  <SelectTrigger className="h-12 rounded-2xl bg-card border-none shadow-sm shadow-primary/5 focus:ring-primary">
-                    <SelectValue placeholder="Semua Coach" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border/50 rounded-xl z-50">
-                    <SelectItem value="all">Semua Coach</SelectItem>
-                    {COACHES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
+    {/* ── Tab: Update Perkembangan Murid (Folder view) ── */ }
+    < TabsContent value = "update" className = "animate-fade-in" >
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="md:col-span-3">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchStudent}
+              onChange={(e) => setSearchStudent(e.target.value)}
+              placeholder="Cari nama murid atau materi..."
+              className="pl-11 h-12 rounded-2xl bg-card border-none shadow-sm shadow-primary/5 focus-visible:ring-primary"
+            />
+          </div>
+        </div>
+        <div className="md:col-span-1">
+          <Select value={filterCoach} onValueChange={setFilterCoach}>
+            <SelectTrigger className="h-12 rounded-2xl bg-card border-none shadow-sm shadow-primary/5 focus:ring-primary">
+              <SelectValue placeholder="Semua Coach" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border/50 rounded-xl z-50">
+              <SelectItem value="all">Semua Coach</SelectItem>
+              {COACHES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+  {/* Folders Grid */ }
+  <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 min-h-[500px]">
+    <div className="flex items-center justify-between mb-6">
+      <h3 className="text-lg font-bold flex items-center gap-2">
+        <FolderOpen className="w-5 h-5 text-amber-500" />
+        Folder Laporan
+      </h3>
+      {!reportsLoading && sortedNames.length > 0 && (
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{sortedNames.length} Siswa</p>
+      )}
+    </div>
+
+    {reportsLoading ? (
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {[...Array(10)].map((_, i) => (
+          <div key={i} className="flex flex-col items-start gap-3 p-4 rounded-2xl border border-border/50 bg-background/50">
+            <Skeleton className="h-10 w-10 rounded-xl" />
+            <div className="space-y-2 w-full">
+              <Skeleton className="h-4 w-3/4 rounded-full" />
+              <Skeleton className="h-2 w-1/2 rounded-full" />
             </div>
+          </div>
+        ))}
+      </div>
 
-            {/* Folders Grid */}
-            <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 min-h-[500px]">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <FolderOpen className="w-5 h-5 text-amber-500" />
-                  Folder Laporan
-                </h3>
-                {!reportsLoading && sortedNames.length > 0 && (
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{sortedNames.length} Siswa</p>
-                )}
-              </div>
+    ) : sortedNames.length === 0 ? (
+      <EmptyState
+        title="Arsip Masih Kosong"
+        description="Belum ada laporan aktivitas yang tersimpan. Mulai buat laporan pertama Anda!"
+      />
+    ) : (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {pagedNames.map((name) => (
 
-              {reportsLoading ? (
-                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {[...Array(10)].map((_, i) => (
-                    <div key={i} className="flex flex-col items-start gap-3 p-4 rounded-2xl border border-border/50 bg-background/50">
-                      <Skeleton className="h-10 w-10 rounded-xl" />
-                      <div className="space-y-2 w-full">
-                        <Skeleton className="h-4 w-3/4 rounded-full" />
-                        <Skeleton className="h-2 w-1/2 rounded-full" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-              ) : sortedNames.length === 0 ? (
-                <EmptyState
-                  title="Arsip Masih Kosong"
-                  description="Belum ada laporan aktivitas yang tersimpan. Mulai buat laporan pertama Anda!"
-                />
-              ) : (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                    {pagedNames.map((name) => (
-
-                      <button
-                        key={name}
-                        onClick={() => setOpenFolder(openFolder === name ? null : name)}
-                        className={cn(
-                          "flex flex-col items-start gap-3 p-4 rounded-2xl border transition-all duration-300 group relative overflow-hidden",
-                          openFolder === name
-                            ? "border-primary bg-primary/10 shadow-lg shadow-primary/5 ring-1 ring-primary/20"
-                            : "border-border/50 bg-background/50 hover:bg-card hover:border-primary/30 hover:shadow-md"
-                        )}
-                      >
-                        <div className={cn(
-                          "p-2.5 rounded-xl transition-colors",
-                          openFolder === name ? "bg-primary text-white" : "bg-amber-100 text-amber-600 group-hover:bg-amber-500 group-hover:text-white"
-                        )}>
-                          <FolderOpen className="h-5 w-5" />
-                        </div>
-                        <div className="min-w-0 w-full">
-                          <p className="font-bold text-sm truncate text-foreground">{name}</p>
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase mt-0.5 tracking-tighter opacity-70">
-                            {grouped[name].length} Reports
-                          </p>
-                        </div>
-                        {openFolder === name && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-4 pt-4 border-t border-border/50">
-                      <Button variant="ghost" size="sm" className="rounded-xl h-10 w-10 p-0" disabled={safePage <= 1} onClick={() => setCurrentPage(safePage - 1)}>
-                        <ChevronLeft className="h-5 w-5" />
-                      </Button>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold bg-muted px-3 py-1 rounded-lg">Hal {safePage}</span>
-                        <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest">dari {totalPages}</span>
-                      </div>
-                      <Button variant="ghost" size="sm" className="rounded-xl h-10 w-10 p-0" disabled={safePage >= totalPages} onClick={() => setCurrentPage(safePage + 1)}>
-                        <ChevronRight className="h-5 w-5" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
+            <button
+              key={name}
+              onClick={() => setOpenFolder(openFolder === name ? null : name)}
+              className={cn(
+                "flex flex-col items-start gap-3 p-4 rounded-2xl border transition-all duration-300 group relative overflow-hidden",
+                openFolder === name
+                  ? "border-primary bg-primary/10 shadow-lg shadow-primary/5 ring-1 ring-primary/20"
+                  : "border-border/50 bg-background/50 hover:bg-card hover:border-primary/30 hover:shadow-md"
               )}
+            >
+              <div className={cn(
+                "p-2.5 rounded-xl transition-colors",
+                openFolder === name ? "bg-primary text-white" : "bg-amber-100 text-amber-600 group-hover:bg-amber-500 group-hover:text-white"
+              )}>
+                <FolderOpen className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 w-full">
+                <p className="font-bold text-sm truncate text-foreground">{name}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase mt-0.5 tracking-tighter opacity-70">
+                  {grouped[name].length} Reports
+                </p>
+              </div>
+              {openFolder === name && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />}
+            </button>
+          ))}
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 pt-4 border-t border-border/50">
+            <Button variant="ghost" size="sm" className="rounded-xl h-10 w-10 p-0" disabled={safePage <= 1} onClick={() => setCurrentPage(safePage - 1)}>
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold bg-muted px-3 py-1 rounded-lg">Hal {safePage}</span>
+              <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest">dari {totalPages}</span>
+            </div>
+            <Button variant="ghost" size="sm" className="rounded-xl h-10 w-10 p-0" disabled={safePage >= totalPages} onClick={() => setCurrentPage(safePage + 1)}>
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+
+  {/* Open folder detail — gunakan groupReportsByLevel dari shared utility */ }
+  {
+    openFolder && (() => {
+      // Cari semua report murid ini dengan case-insensitive dan trim
+      const studentReports = reports
+        .filter((r) => r.studentName.trim().toLowerCase() === openFolder.toLowerCase())
+        .sort((a, b) => a.lessonWeek - b.lessonWeek);
+
+      if (studentReports.length === 0) return null;
+
+      const { levels, trialReport } = groupReportsByLevel(studentReports);
+
+      // Compute missing weeks per level
+      const getMissingWeeks = (lvl: typeof levels[0]) => {
+        const uploaded = new Set([...lvl.halfA, ...lvl.halfB].map(r => r.lessonWeek));
+        const allWeeks = Array.from({ length: lvl.end - lvl.start + 1 }, (_, i) => lvl.start + i);
+        return allWeeks.filter(w => !uploaded.has(w));
+      };
+
+      return (
+        <div className="mt-4 space-y-3 pb-20">
+          <div className="flex items-center justify-between bg-card p-4 rounded-2xl border border-border/50 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-xl">
+                <FolderOpen className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-foreground leading-none">{openFolder}</h3>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{studentReports.length} Total Laporan</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setOpenFolder(null)} className="rounded-xl hover:bg-destructive/10 hover:text-destructive transition-colors">Tutup</Button>
+          </div>
+
+          {/* ── Missing Weeks Tracker ── */}
+          <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <CalendarRange className="w-5 h-5 text-primary" />
+              <h4 className="font-black text-sm uppercase tracking-widest text-foreground">Tracker Minggu Belum Di-upload</h4>
             </div>
 
-            {/* Open folder detail — gunakan groupReportsByLevel dari shared utility */}
-            {openFolder && (() => {
-              // Cari semua report murid ini dengan case-insensitive dan trim
-              const studentReports = reports
-                .filter((r) => r.studentName.trim().toLowerCase() === openFolder.toLowerCase())
-                .sort((a, b) => a.lessonWeek - b.lessonWeek);
-              
-              if (studentReports.length === 0) return null;
+            {levels.length === 0 && !trialReport && (
+              <p className="text-xs text-muted-foreground italic">Belum ada data level untuk murid ini.</p>
+            )}
 
-              const { levels, trialReport } = groupReportsByLevel(studentReports);
-
-              // Compute missing weeks per level
-              const getMissingWeeks = (lvl: typeof levels[0]) => {
-                const uploaded = new Set([...lvl.halfA, ...lvl.halfB].map(r => r.lessonWeek));
+            <div className="space-y-5">
+              {levels.map((lvl) => {
+                const uploadedWeeks = new Set([...lvl.halfA, ...lvl.halfB].map(r => r.lessonWeek));
                 const allWeeks = Array.from({ length: lvl.end - lvl.start + 1 }, (_, i) => lvl.start + i);
-                return allWeeks.filter(w => !uploaded.has(w));
-              };
+                const missingWeeks = allWeeks.filter(w => !uploadedWeeks.has(w));
+                const uploadedCount = uploadedWeeks.size;
+                const totalWeeks = allWeeks.length;
+                const progressPct = Math.round((uploadedCount / totalWeeks) * 100);
 
-              return (
-                <div className="mt-4 space-y-3 pb-20">
-                  <div className="flex items-center justify-between bg-card p-4 rounded-2xl border border-border/50 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-xl">
-                        <FolderOpen className="h-5 w-5 text-primary" />
+                return (
+                  <div key={lvl.level} className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-foreground uppercase tracking-widest">Level {lvl.level}</span>
+                        <span className="text-[10px] text-muted-foreground">(W{lvl.start}–W{lvl.end})</span>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-foreground leading-none">{openFolder}</h3>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{studentReports.length} Total Laporan</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-emerald-600">{uploadedCount}/{totalWeeks} di-upload</span>
+                        {missingWeeks.length > 0 && (
+                          <span className="text-[10px] font-black bg-red-100 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">
+                            {missingWeeks.length} belum
+                          </span>
+                        )}
+                        {missingWeeks.length === 0 && (
+                          <span className="text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            ✓ Lengkap
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => setOpenFolder(null)} className="rounded-xl hover:bg-destructive/10 hover:text-destructive transition-colors">Tutup</Button>
-                  </div>
 
-                  {/* ── Missing Weeks Tracker ── */}
-                  <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm space-y-4">
-                    <div className="flex items-center gap-2">
-                      <CalendarRange className="w-5 h-5 text-primary" />
-                      <h4 className="font-black text-sm uppercase tracking-widest text-foreground">Tracker Minggu Belum Di-upload</h4>
+                    {/* Progress bar */}
+                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${progressPct}%`,
+                          backgroundColor: progressPct === 100 ? '#10b981' : progressPct >= 50 ? '#f59e0b' : '#ef4444'
+                        }}
+                      />
                     </div>
 
-                    {levels.length === 0 && !trialReport && (
-                      <p className="text-xs text-muted-foreground italic">Belum ada data level untuk murid ini.</p>
-                    )}
-
-                    <div className="space-y-5">
-                      {levels.map((lvl) => {
-                        const uploadedWeeks = new Set([...lvl.halfA, ...lvl.halfB].map(r => r.lessonWeek));
-                        const allWeeks = Array.from({ length: lvl.end - lvl.start + 1 }, (_, i) => lvl.start + i);
-                        const missingWeeks = allWeeks.filter(w => !uploadedWeeks.has(w));
-                        const uploadedCount = uploadedWeeks.size;
-                        const totalWeeks = allWeeks.length;
-                        const progressPct = Math.round((uploadedCount / totalWeeks) * 100);
-
+                    {/* Week grid */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {allWeeks.map(week => {
+                        const isUploaded = uploadedWeeks.has(week);
+                        const report = [...lvl.halfA, ...lvl.halfB].find(r => r.lessonWeek === week);
                         return (
-                          <div key={lvl.level} className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-black text-foreground uppercase tracking-widest">Level {lvl.level}</span>
-                                <span className="text-[10px] text-muted-foreground">(W{lvl.start}–W{lvl.end})</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-emerald-600">{uploadedCount}/{totalWeeks} di-upload</span>
-                                {missingWeeks.length > 0 && (
-                                  <span className="text-[10px] font-black bg-red-100 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">
-                                    {missingWeeks.length} belum
-                                  </span>
-                                )}
-                                {missingWeeks.length === 0 && (
-                                  <span className="text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
-                                    ✓ Lengkap
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Progress bar */}
-                            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{
-                                  width: `${progressPct}%`,
-                                  backgroundColor: progressPct === 100 ? '#10b981' : progressPct >= 50 ? '#f59e0b' : '#ef4444'
-                                }}
-                              />
-                            </div>
-
-                            {/* Week grid */}
-                            <div className="flex flex-wrap gap-1.5">
-                              {allWeeks.map(week => {
-                                const isUploaded = uploadedWeeks.has(week);
-                                const report = [...lvl.halfA, ...lvl.halfB].find(r => r.lessonWeek === week);
-                                return (
-                                  <div
-                                    key={week}
-                                    title={isUploaded ? `Week ${week}: ${report?.lessonName || 'Sudah di-upload'}` : `Week ${week}: Belum di-upload`}
-                                    className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black cursor-default transition-all border ${
-                                      isUploaded
-                                        ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-200'
-                                        : 'bg-red-50 text-red-500 border-red-200 border-dashed'
-                                    }`}
-                                  >
-                                    {week}
-                                    {isUploaded && (
-                                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-600 rounded-full flex items-center justify-center">
-                                        <span className="text-[6px] text-white font-black">✓</span>
-                                      </span>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-
-                            {/* Missing week pills */}
-                            {missingWeeks.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5 pt-1">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mr-1 self-center">Belum upload:</span>
-                                {missingWeeks.map(week => (
-                                  <button
-                                    key={week}
-                                    onClick={() => setEditingReport({
-                                      id: '',
-<<<<<<< HEAD
-                                      studentName: openFolder || '',
-=======
-                                      studentName: openFolder,
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
-                                      date: new Date().toISOString().split('T')[0],
-                                      level: studentReports[0]?.level || '',
-                                      lessonWeek: week,
-                                      lessonName: '',
-                                      tools: '',
-                                      coach: studentReports[0]?.coach || '',
-                                      coachComment: '',
-                                      goalsMateri: '',
-                                      activityReportText: '',
-                                      mediaUrls: [],
-                                      externalLinks: [],
-                                      createdAt: '',
-<<<<<<< HEAD
-                                    } as ActivityReport)}
-=======
-                                    } as any)}
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
-                                    title={`Klik untuk upload report Week ${week}`}
-                                    className="text-[10px] font-black px-2.5 py-1 rounded-full bg-red-100 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all cursor-pointer"
-                                  >
-                                    W{week} →
-                                  </button>
-                                ))}
-                              </div>
+                          <div
+                            key={week}
+                            title={isUploaded ? `Week ${week}: ${report?.lessonName || 'Sudah di-upload'}` : `Week ${week}: Belum di-upload`}
+                            className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black cursor-default transition-all border ${isUploaded
+                                ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-200'
+                                : 'bg-red-50 text-red-500 border-red-200 border-dashed'
+                              }`}
+                          >
+                            {week}
+                            {isUploaded && (
+                              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-600 rounded-full flex items-center justify-center">
+                                <span className="text-[6px] text-white font-black">✓</span>
+                              </span>
                             )}
                           </div>
                         );
                       })}
                     </div>
 
-                    {/* Legend */}
-                    <div className="flex items-center gap-4 pt-3 border-t border-border/50">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 rounded-md bg-emerald-500 border border-emerald-600" />
-                        <span className="text-[10px] font-bold text-muted-foreground">Sudah di-upload</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 rounded-md bg-red-50 border border-red-200 border-dashed" />
-                        <span className="text-[10px] font-bold text-muted-foreground">Belum di-upload</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Sesi Trial jika ada */}
-                  {trialReport && (
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
-                        Sesi Perkenalan (Trial)
-                      </h4>
-                      <ReportCard r={trialReport} onEdit={setEditingReport} onDelete={handleDeleteReport} />
-                    </div>
-                  )}
-
-                  {levels.map((lvl) => (
-                    <div key={lvl.level} className="space-y-3">
-                      <h4 className="text-md font-bold text-foreground border-b border-border pb-1">
-                        Level {lvl.level}{' '}
-                        <span className="text-sm font-normal text-muted-foreground">(Week {lvl.start} – {lvl.end})</span>
-                      </h4>
-                      {lvl.halfA.length > 0 && (
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                            Week {lvl.start} – {lvl.start + 7}
-                          </p>
-                          <div className="space-y-2">
-                            {lvl.halfA.map((r) => (
-                              <ReportCard key={r.id} r={r} onEdit={setEditingReport} onDelete={handleDeleteReport} />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {lvl.halfB.length > 0 && (
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                            Week {lvl.start + 8} – {lvl.end}
-                          </p>
-                          <div className="space-y-2">
-                            {lvl.halfB.map((r) => (
-                              <ReportCard key={r.id} r={r} onEdit={setEditingReport} onDelete={handleDeleteReport} />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {lvl.halfA.length === 0 && lvl.halfB.length === 0 && (
-                        <p className="text-xs text-muted-foreground italic py-2">Belum ada report untuk level ini.</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
-          </TabsContent>
-
-          {/* ── Tab: Banner Hari Raya ── */}
-          <TabsContent value="banners" className="animate-fade-in">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-              {/* Upload Form */}
-              <div className="lg:col-span-1">
-                <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 space-y-5">
-                  <h3 className="text-lg font-bold flex items-center gap-2">
-                    <Plus className="w-4 h-4 text-primary" /> Tambah Banner
-                  </h3>
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nama Event</Label>
-                    <Input
-                      value={bannerName}
-                      onChange={(e) => setBannerName(e.target.value)}
-                      placeholder="Contoh: Selamat Idul Fitri 1447H"
-                      className="h-11 rounded-xl"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tanggal Mulai</Label>
-                      <Input type="date" value={bannerStartDate} onChange={(e) => setBannerStartDate(e.target.value)} className="h-11 rounded-xl" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tanggal Akhir</Label>
-                      <Input type="date" value={bannerEndDate} onChange={(e) => setBannerEndDate(e.target.value)} className="h-11 rounded-xl" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Foto Banner</Label>
-                    <div className="relative">
-                      <Input
-                        id="banner-file-input"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setBannerFile(e.target.files?.[0] || null)}
-                        className="h-11 rounded-xl file:mr-3 file:font-bold file:text-primary file:bg-primary/10 file:border-0 file:rounded-lg file:h-full file:px-3 cursor-pointer"
-                      />
-                    </div>
-                    {bannerFile && (
-                      <div className="mt-2 rounded-xl overflow-hidden border border-border/50">
-                        <img
-                          src={URL.createObjectURL(bannerFile)}
-                          alt="Preview"
-                          className="w-full max-h-40 object-cover"
-                        />
+                    {/* Missing week pills */}
+                    {missingWeeks.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mr-1 self-center">Belum upload:</span>
+                        {missingWeeks.map(week => (
+                          <button
+                            key={week}
+                            onClick={() => setEditingReport({
+                              id: '',
+                              studentName: openFolder || '',
+                              date: new Date().toISOString().split('T')[0],
+                              level: studentReports[0]?.level || '',
+                              lessonWeek: week,
+                              lessonName: '',
+                              tools: '',
+                              coach: studentReports[0]?.coach || '',
+                              coachComment: '',
+                              goalsMateri: '',
+                              activityReportText: '',
+                              mediaUrls: [],
+                              externalLinks: [],
+                              createdAt: '',
+                            } as ActivityReport)}
+                            title={`Klik untuk upload report Week ${week}`}
+                            className="text-[10px] font-black px-2.5 py-1 rounded-full bg-red-100 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all cursor-pointer"
+                          >
+                            W{week} →
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>
-                  <Button
-                    onClick={handleAddBanner}
-                    disabled={bannerUploading}
-                    className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20"
-                  >
-                    {bannerUploading ? (
-                      <><Upload className="w-4 h-4 mr-2 animate-spin" />Mengunggah...</>
-                    ) : (
-                      <><Plus className="w-4 h-4 mr-2" />Simpan Banner</>
-                    )}
-                  </Button>
-                  <p className="text-[10px] text-muted-foreground italic text-center leading-relaxed">
-                    💡 Foto dikompresi & disimpan otomatis, tidak perlu layanan penyimpanan eksternal.
-                  </p>
-                </div>
-              </div>
-
-              {/* Banner List */}
-              <div className="lg:col-span-2">
-                <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 min-h-[400px]">
-                  <h3 className="text-lg font-bold flex items-center gap-2 mb-6">
-                    <CalendarRange className="w-4 h-4 text-primary" /> Daftar Banner
-                  </h3>
-                  {bannersLoading ? (
-                    <div className="space-y-4 py-2">
-                      {[...Array(4)].map((_, idx) => (
-                        <div key={`banner-skeleton-${idx}`} className="flex gap-4 p-4 rounded-2xl border border-border/50 bg-background/50">
-                          <Skeleton className="w-20 h-20 rounded-xl shrink-0" />
-                          <div className="flex-1 space-y-2">
-                            <Skeleton className="h-5 w-48" />
-                            <Skeleton className="h-4 w-40" />
-                            <div className="flex gap-2">
-                              <Skeleton className="h-7 w-20 rounded-lg" />
-                              <Skeleton className="h-7 w-16 rounded-lg" />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : banners.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 opacity-50 space-y-3">
-                      <Image className="w-12 h-12 text-muted-foreground" />
-                      <p className="text-sm font-bold text-muted-foreground">Belum ada banner.</p>
-                      <p className="text-xs text-muted-foreground">Tambahkan banner hari raya pertama di form kiri.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {banners.map((banner) => {
-                        const today = new Date().toISOString().split('T')[0];
-                        const isCurrentlyActive = banner.isActive && banner.startDate <= today && banner.endDate >= today;
-                        return (
-                          <div key={banner.id} className="flex gap-4 p-4 rounded-2xl border border-border/50 bg-background/50 hover:bg-card transition-colors group">
-                            <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-border/50">
-                              <img src={banner.imageUrl} alt={banner.name} className="w-full h-full object-cover" />
-                              {isCurrentlyActive && (
-                                <div className="absolute top-1 left-1 bg-green-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">
-                                  Live
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-bold text-sm text-foreground truncate">{banner.name}</p>
-                              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
-                                <CalendarRange className="w-3 h-3" />
-                                {banner.startDate} → {banner.endDate}
-                              </p>
-                              <div className="flex items-center gap-2 mt-3">
-                                <button
-                                  onClick={() => toggleBanner(banner.id, !banner.isActive)}
-                                  className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all ${
-                                    banner.isActive
-                                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                  }`}
-                                >
-                                  {banner.isActive ? (
-                                    <><ToggleRight className="w-3.5 h-3.5" />Aktif</>
-                                  ) : (
-                                    <><ToggleLeft className="w-3.5 h-3.5" />Nonaktif</>
-                                  )}
-                                </button>
-                                <button
-                                  onClick={() => deleteBanner(banner.id)}
-                                  className="flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />Hapus
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-
+                );
+              })}
             </div>
-          </TabsContent>
 
-        </Tabs>
+            {/* Legend */}
+            <div className="flex items-center gap-4 pt-3 border-t border-border/50">
+              <div className="flex items-center gap-1.5">
+                <div className="w-4 h-4 rounded-md bg-emerald-500 border border-emerald-600" />
+                <span className="text-[10px] font-bold text-muted-foreground">Sudah di-upload</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-4 h-4 rounded-md bg-red-50 border border-red-200 border-dashed" />
+                <span className="text-[10px] font-bold text-muted-foreground">Belum di-upload</span>
+              </div>
+            </div>
+          </div>
 
-        {/* Edit Dialog */}
-        <Dialog open={!!editingReport} onOpenChange={(open) => !open && setEditingReport(null)}>
-          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Edit Report</DialogTitle></DialogHeader>
-            {editingReport && (
-              <ReportForm initial={editingReport} onSubmit={handleUpdateReport} submitLabel="Update Report" />
+          {/* Sesi Trial jika ada */}
+          {trialReport && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
+                Sesi Perkenalan (Trial)
+              </h4>
+              <ReportCard r={trialReport} onEdit={setEditingReport} onDelete={handleDeleteReport} />
+            </div>
+          )}
+
+          {levels.map((lvl) => (
+            <div key={lvl.level} className="space-y-3">
+              <h4 className="text-md font-bold text-foreground border-b border-border pb-1">
+                Level {lvl.level}{' '}
+                <span className="text-sm font-normal text-muted-foreground">(Week {lvl.start} – {lvl.end})</span>
+              </h4>
+              {lvl.halfA.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    Week {lvl.start} – {lvl.start + 7}
+                  </p>
+                  <div className="space-y-2">
+                    {lvl.halfA.map((r) => (
+                      <ReportCard key={r.id} r={r} onEdit={setEditingReport} onDelete={handleDeleteReport} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {lvl.halfB.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    Week {lvl.start + 8} – {lvl.end}
+                  </p>
+                  <div className="space-y-2">
+                    {lvl.halfB.map((r) => (
+                      <ReportCard key={r.id} r={r} onEdit={setEditingReport} onDelete={handleDeleteReport} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {lvl.halfA.length === 0 && lvl.halfB.length === 0 && (
+                <p className="text-xs text-muted-foreground italic py-2">Belum ada report untuk level ini.</p>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    })()
+  }
+          </TabsContent >
+
+    {/* ── Tab: Banner Hari Raya ── */ }
+    < TabsContent value = "banners" className = "animate-fade-in" >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Upload Form */}
+        <div className="lg:col-span-1">
+          <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 space-y-5">
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <Plus className="w-4 h-4 text-primary" /> Tambah Banner
+            </h3>
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nama Event</Label>
+              <Input
+                value={bannerName}
+                onChange={(e) => setBannerName(e.target.value)}
+                placeholder="Contoh: Selamat Idul Fitri 1447H"
+                className="h-11 rounded-xl"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tanggal Mulai</Label>
+                <Input type="date" value={bannerStartDate} onChange={(e) => setBannerStartDate(e.target.value)} className="h-11 rounded-xl" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tanggal Akhir</Label>
+                <Input type="date" value={bannerEndDate} onChange={(e) => setBannerEndDate(e.target.value)} className="h-11 rounded-xl" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Foto Banner</Label>
+              <div className="relative">
+                <Input
+                  id="banner-file-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setBannerFile(e.target.files?.[0] || null)}
+                  className="h-11 rounded-xl file:mr-3 file:font-bold file:text-primary file:bg-primary/10 file:border-0 file:rounded-lg file:h-full file:px-3 cursor-pointer"
+                />
+              </div>
+              {bannerFile && (
+                <div className="mt-2 rounded-xl overflow-hidden border border-border/50">
+                  <img
+                    src={URL.createObjectURL(bannerFile)}
+                    alt="Preview"
+                    className="w-full max-h-40 object-cover"
+                  />
+                </div>
+              )}
+            </div>
+            <Button
+              onClick={handleAddBanner}
+              disabled={bannerUploading}
+              className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20"
+            >
+              {bannerUploading ? (
+                <><Upload className="w-4 h-4 mr-2 animate-spin" />Mengunggah...</>
+              ) : (
+                <><Plus className="w-4 h-4 mr-2" />Simpan Banner</>
+              )}
+            </Button>
+            <p className="text-[10px] text-muted-foreground italic text-center leading-relaxed">
+              💡 Foto dikompresi & disimpan otomatis, tidak perlu layanan penyimpanan eksternal.
+            </p>
+          </div>
+        </div>
+
+        {/* Banner List */}
+        <div className="lg:col-span-2">
+          <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 min-h-[400px]">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-6">
+              <CalendarRange className="w-4 h-4 text-primary" /> Daftar Banner
+            </h3>
+            {bannersLoading ? (
+              <div className="space-y-4 py-2">
+                {[...Array(4)].map((_, idx) => (
+                  <div key={`banner-skeleton-${idx}`} className="flex gap-4 p-4 rounded-2xl border border-border/50 bg-background/50">
+                    <Skeleton className="w-20 h-20 rounded-xl shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-48" />
+                      <Skeleton className="h-4 w-40" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-7 w-20 rounded-lg" />
+                        <Skeleton className="h-7 w-16 rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : banners.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 opacity-50 space-y-3">
+                <Image className="w-12 h-12 text-muted-foreground" />
+                <p className="text-sm font-bold text-muted-foreground">Belum ada banner.</p>
+                <p className="text-xs text-muted-foreground">Tambahkan banner hari raya pertama di form kiri.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {banners.map((banner) => {
+                  const today = new Date().toISOString().split('T')[0];
+                  const isCurrentlyActive = banner.isActive && banner.startDate <= today && banner.endDate >= today;
+                  return (
+                    <div key={banner.id} className="flex gap-4 p-4 rounded-2xl border border-border/50 bg-background/50 hover:bg-card transition-colors group">
+                      <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-border/50">
+                        <img src={banner.imageUrl} alt={banner.name} className="w-full h-full object-cover" />
+                        {isCurrentlyActive && (
+                          <div className="absolute top-1 left-1 bg-green-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">
+                            Live
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm text-foreground truncate">{banner.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                          <CalendarRange className="w-3 h-3" />
+                          {banner.startDate} → {banner.endDate}
+                        </p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <button
+                            onClick={() => toggleBanner(banner.id, !banner.isActive)}
+                            className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all ${banner.isActive
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                              }`}
+                          >
+                            {banner.isActive ? (
+                              <><ToggleRight className="w-3.5 h-3.5" />Aktif</>
+                            ) : (
+                              <><ToggleLeft className="w-3.5 h-3.5" />Nonaktif</>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => deleteBanner(banner.id)}
+                            className="flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />Hapus
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
-          </DialogContent>
-        </Dialog>
+          </div>
+        </div>
 
-        {/* Delete Confirm */}
-        <DeleteConfirmDialog
-          open={!!deletingReportId}
-          onOpenChange={(open) => { if (!open) { setDeletingReportId(null); setDeletingReportName(undefined); } }}
-          onConfirm={() => {
-            if (deletingReportId) {
-              deleteReport(deletingReportId);
-              toast({ title: 'Dihapus', description: `Laporan ${deletingReportName} berhasil dihapus.`, variant: 'destructive' });
-              setDeletingReportId(null);
-              setDeletingReportName(undefined);
-            }
-          }}
-          studentName={deletingReportName}
-        />
-      </main>
-    </div>
+      </div>
+          </TabsContent >
+
+        </Tabs >
+
+    {/* Edit Dialog */ }
+    < Dialog open = {!!editingReport
+} onOpenChange = {(open) => !open && setEditingReport(null)}>
+  <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+    <DialogHeader><DialogTitle>Edit Report</DialogTitle></DialogHeader>
+    {editingReport && (
+      <ReportForm initial={editingReport} onSubmit={handleUpdateReport} submitLabel="Update Report" />
+    )}
+  </DialogContent>
+        </Dialog >
+
+  {/* Delete Confirm */ }
+  < DeleteConfirmDialog
+open = {!!deletingReportId}
+onOpenChange = {(open) => { if (!open) { setDeletingReportId(null); setDeletingReportName(undefined); } }}
+onConfirm = {() => {
+  if (deletingReportId) {
+    deleteReport(deletingReportId);
+    toast({ title: 'Dihapus', description: `Laporan ${deletingReportName} berhasil dihapus.`, variant: 'destructive' });
+    setDeletingReportId(null);
+    setDeletingReportName(undefined);
+  }
+}}
+studentName = { deletingReportName }
+  />
+      </main >
+    </div >
   );
 }

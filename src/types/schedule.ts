@@ -1,10 +1,6 @@
 export type DayOfWeek = 'senin' | 'selasa' | 'rabu' | 'kamis' | 'jumat' | 'sabtu' | 'minggu';
 
-<<<<<<< HEAD
 export type Coach = 'Mr. Bani' | 'Mr. Argy' | 'Ms. Zaura';
-=======
-export type Coach = 'Mr. Bani' | 'Mr. Argy';
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
 export type StudentLevel =
   | 'Little Creator 1'
@@ -28,11 +24,8 @@ export interface ScheduleEntry {
   day: DayOfWeek;
   time: TimeSlot;
   isActive: boolean;
-<<<<<<< HEAD
   status: 'active' | 'inactive' | 'pending';
   startDate?: string;
-=======
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   inactiveReason?: string;
   notes?: string;
   updatedBy?: string;
@@ -41,11 +34,7 @@ export interface ScheduleEntry {
 
 export const DAYS: DayOfWeek[] = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
 
-<<<<<<< HEAD
 export const COACHES: Coach[] = ['Mr. Bani', 'Mr. Argy', 'Ms. Zaura'];
-=======
-export const COACHES: Coach[] = ['Mr. Bani', 'Mr. Argy'];
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
 export const LEVELS: StudentLevel[] = [
   'Little Creator 1', 'Little Creator 2',

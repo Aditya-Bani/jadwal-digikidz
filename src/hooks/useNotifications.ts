@@ -27,7 +27,6 @@ export function useNotifications() {
       return;
     }
 
-<<<<<<< HEAD
     interface DbNotification {
       id: string;
       message: string;
@@ -37,10 +36,6 @@ export function useNotifications() {
 
     setNotifications(
       (data as DbNotification[] || []).map((r) => {
-=======
-    setNotifications(
-      (data || []).map((r: any) => {
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
         const readMatch = r.message.match(/\[READ:(.*?)\]/);
         const readBy = readMatch ? readMatch[1].split(',').filter(Boolean) : [];
         const cleanMessage = r.message.replace(/\[READ:.*?\]/g, '').trim();

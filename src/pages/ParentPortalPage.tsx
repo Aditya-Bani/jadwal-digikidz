@@ -21,11 +21,8 @@ import { PortalDashboard } from '@/components/parent-portal/PortalDashboard';
 import { ActivityReportPlayer } from '@/components/parent-portal/ActivityReportPlayer';
 import { CertificatePreviewDialog } from '@/components/parent-portal/CertificatePreviewDialog';
 import { usePrograms } from '@/hooks/usePrograms';
-<<<<<<< HEAD
 import { useActiveBanner } from '@/hooks/useHolidayBanners';
 import { HolidayBannerPopup } from '@/components/HolidayBannerPopup';
-=======
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
 export default function ParentPortalPage() {
   const [code, setCode] = useState('');
@@ -191,10 +188,7 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
   const { reports, loading } = useActivityReports(studentName, accessCode);
   const { certificates } = useCertificates(studentName);
   const { getProgramLimit } = usePrograms();
-<<<<<<< HEAD
   const { banner } = useActiveBanner();
-=======
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
   const [viewMode, setViewMode] = useState<'dashboard' | 'player'>('dashboard');
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
@@ -291,10 +285,7 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
   return (
     <>
       <PortalHeader studentName={studentName} onLogout={onBack} />
-<<<<<<< HEAD
       {banner && <HolidayBannerPopup banner={banner} />}
-=======
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
       
       {viewMode === 'dashboard' ? (
         <PortalDashboard

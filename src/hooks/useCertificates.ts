@@ -15,15 +15,7 @@ export function useCertificates(studentName?: string | null) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-<<<<<<< HEAD
   const fetchCertificates = useCallback(async () => {
-=======
-  useEffect(() => {
-    fetchCertificates();
-  }, [studentName]);
-
-  const fetchCertificates = async () => {
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
     try {
       setLoading(true);
       let query = supabase
@@ -49,14 +41,9 @@ export function useCertificates(studentName?: string | null) {
         }));
         setCertificates(formattedCerts);
       }
-<<<<<<< HEAD
     } catch (error) {
       const err = error as Error;
       console.error('Error fetching certificates:', err.message);
-=======
-    } catch (error: any) {
-      console.error('Error fetching certificates:', error.message);
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
       toast({
         title: 'Gagal Memuat',
         description: 'Tidak dapat mengambil daftar sertifikat.',
@@ -65,15 +52,11 @@ export function useCertificates(studentName?: string | null) {
     } finally {
       setLoading(false);
     }
-<<<<<<< HEAD
   }, [studentName, toast]);
 
   useEffect(() => {
     fetchCertificates();
   }, [fetchCertificates]);
-=======
-  };
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
   const addCertificate = async (cert: Omit<StudentCertificate, 'id' | 'createdAt'>) => {
     try {
@@ -100,16 +83,10 @@ export function useCertificates(studentName?: string | null) {
         setCertificates([newCert, ...certificates]);
       }
       return { success: true };
-<<<<<<< HEAD
     } catch (error) {
       const err = error as Error;
       console.error('Error adding certificate:', err.message);
       return { success: false, error: err.message };
-=======
-    } catch (error: any) {
-      console.error('Error adding certificate:', error.message);
-      return { success: false, error: error.message };
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
     }
   };
 
@@ -136,16 +113,10 @@ export function useCertificates(studentName?: string | null) {
 
       setCertificates(certificates.filter((c) => c.id !== id));
       return { success: true };
-<<<<<<< HEAD
     } catch (error) {
       const err = error as Error;
       console.error('Error deleting certificate:', err.message);
       return { success: false, error: err.message };
-=======
-    } catch (error: any) {
-      console.error('Error deleting certificate:', error.message);
-      return { success: false, error: error.message };
->>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
     }
   };
 
