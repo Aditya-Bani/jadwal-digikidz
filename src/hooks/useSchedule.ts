@@ -19,6 +19,7 @@ interface DbScheduleEntry {
 
 function dbToApp(row: DbScheduleEntry): ScheduleEntry {
   let notes = row.notes || undefined;
+<<<<<<< HEAD
   let status: 'active' | 'inactive' | 'pending' = 'active';
   let inactiveReason: string | undefined = undefined;
   let startDate: string | undefined = undefined;
@@ -66,6 +67,14 @@ function dbToApp(row: DbScheduleEntry): ScheduleEntry {
       }
       notes = notes.replace(/\[PENDING:?.*?\]\s*/g, '').trim() || undefined;
     }
+=======
+  let isActive = true;
+  const inactiveReason = row.notes?.match(/\[INACTIVE:?(.*?)\]/)?.[1] || undefined;
+
+  if (notes && notes.includes('[INACTIVE')) {
+    isActive = false;
+    notes = notes.replace(/\[INACTIVE:?.*?\]\s*/g, '').trim() || undefined;
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   }
 
   return {
@@ -76,9 +85,12 @@ function dbToApp(row: DbScheduleEntry): ScheduleEntry {
     day: row.day as DayOfWeek,
     time: row.time as TimeSlot,
     isActive,
+<<<<<<< HEAD
     status,
     startDate,
     inactiveReason,
+=======
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
     notes: notes,
     updatedBy: row.updated_by || undefined,
     updatedAt: row.updated_at,
@@ -136,6 +148,7 @@ export function useSchedule() {
 
   const addEntry = useCallback(async (entry: Omit<ScheduleEntry, 'id'>) => {
     let finalNotes = entry.notes || '';
+<<<<<<< HEAD
     if (entry.status === 'inactive') {
       const tag = entry.inactiveReason ? `[INACTIVE:${entry.inactiveReason}]` : '[INACTIVE]';
       finalNotes = `${tag} ${finalNotes}`.trim();
@@ -144,6 +157,9 @@ export function useSchedule() {
       const tag = pendingVal ? `[PENDING:${pendingVal}]` : '[PENDING]';
       finalNotes = `${tag} ${finalNotes}`.trim();
     } else if (entry.isActive === false) {
+=======
+    if (entry.isActive === false) {
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
       finalNotes = `[INACTIVE] ${finalNotes}`.trim();
     }
 
@@ -200,7 +216,11 @@ export function useSchedule() {
     const existingEntry = schedule.find(e => e.id === id);
     if (!existingEntry) return;
 
+<<<<<<< HEAD
     const dbUpdates: Record<string, unknown> = {};
+=======
+    const dbUpdates: Record<string, any> = {};
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
     if (updates.studentName !== undefined) dbUpdates.student_name = updates.studentName;
     if (updates.coach !== undefined) dbUpdates.coach = updates.coach;
     if (updates.level !== undefined) dbUpdates.level = updates.level;
@@ -209,6 +229,7 @@ export function useSchedule() {
     if (updates.updatedBy !== undefined) dbUpdates.updated_by = updates.updatedBy;
 
     const baseNotes = updates.notes !== undefined ? updates.notes : existingEntry.notes;
+<<<<<<< HEAD
     const finalStatus = updates.status !== undefined
       ? updates.status
       : (updates.isActive !== undefined ? (updates.isActive ? 'active' : 'inactive') : existingEntry.status);
@@ -223,6 +244,15 @@ export function useSchedule() {
       const pendingVal = finalStartDate || finalReason;
       const tag = pendingVal ? `[PENDING:${pendingVal}]` : '[PENDING]';
       finalNotes = `${tag} ${finalNotes}`.trim();
+=======
+    const finalIsActive = updates.isActive !== undefined ? updates.isActive : existingEntry.isActive;
+    const finalReason = updates.inactiveReason !== undefined ? updates.inactiveReason : existingEntry.inactiveReason;
+
+    let finalNotes = baseNotes || '';
+    if (!finalIsActive) {
+      const tag = finalReason ? `[INACTIVE:${finalReason}]` : '[INACTIVE]';
+      finalNotes = `${tag} ${finalNotes}`.trim();
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
     }
 
     dbUpdates.notes = finalNotes || null;

@@ -18,6 +18,7 @@ function getLevelClass(level: string): string {
 }
 
 export function ScheduleEntryCard({ entry, onEdit, onDelete }: ScheduleEntryProps) {
+<<<<<<< HEAD
   const coachClass =
     entry.coach === 'Mr. Bani'
       ? 'coach-bani'
@@ -46,6 +47,15 @@ export function ScheduleEntryCard({ entry, onEdit, onDelete }: ScheduleEntryProp
         </div>
       )}
       {isInactive && (
+=======
+  const coachClass = entry.coach === 'Mr. Bani' ? 'coach-bani' : 'coach-argy';
+  const levelClass = getLevelClass(entry.level);
+  const inactiveClass = !entry.isActive ? 'opacity-40 grayscale hover:opacity-80 transition-opacity' : '';
+
+  return (
+    <div className={cn('schedule-entry group relative border shadow-sm/50 p-2.5 rounded-xl transition-all duration-300', coachClass, inactiveClass)}>
+      {!entry.isActive && (
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
         <div className="absolute -top-2 -right-2 bg-slate-500 text-white text-[9px] px-2 py-1 rounded-full font-bold shadow-sm z-10 uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap">
           <span className="opacity-70">Nonaktif</span>
           {entry.inactiveReason && (
@@ -58,7 +68,11 @@ export function ScheduleEntryCard({ entry, onEdit, onDelete }: ScheduleEntryProp
       )}
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
+<<<<<<< HEAD
           <p className={cn("font-bold text-foreground truncate text-sm tracking-tight", isInactive && "line-through opacity-70")}>{entry.studentName}</p>
+=======
+          <p className={cn("font-bold text-foreground truncate text-sm tracking-tight", !entry.isActive && "line-through opacity-70")}>{entry.studentName}</p>
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
           <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest mt-0.5">{entry.coach}</p>
           <div className="mt-2 text-left">
             <span className={cn('level-badge text-[10px] py-1 px-2 font-black uppercase tracking-tighter inline-block break-words max-w-full leading-tight', levelClass)}>

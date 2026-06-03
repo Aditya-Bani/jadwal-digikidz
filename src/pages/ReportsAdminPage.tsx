@@ -1,9 +1,16 @@
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { useActivityReports, useAccessCodes, uploadReportMedia, ActivityReport } from '@/hooks/useActivityReports';
 import { COACHES, LEVELS, Coach } from '@/types/schedule';
 import { useSchedule } from '@/hooks/useSchedule';
 import { useSearchParams } from 'react-router-dom';
+=======
+import { useState } from 'react';
+import { Header } from '@/components/Header';
+import { useActivityReports, useAccessCodes, uploadReportMedia, ActivityReport } from '@/hooks/useActivityReports';
+import { COACHES, LEVELS, Coach } from '@/types/schedule';
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +47,11 @@ function formatWhatsAppMessage(r: {
 }): string {
   const d = new Date(r.date + 'T00:00:00');
   const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+<<<<<<< HEAD
   const coachTitle = r.coach.includes('Bani') ? 'Mr. Bani' : r.coach.includes('Argy') ? 'Mr. Argy' : r.coach.includes('Zaura') ? 'Ms. Zaura' : r.coach;
+=======
+  const coachTitle = r.coach.includes('Bani') ? 'Mr. Bani' : r.coach.includes('Argy') ? 'Mr. Argy' : r.coach;
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   const lessonLabel = r.lessonWeek === 0 ? `Trial` : `Week ${r.lessonWeek}`;
 
   let msg = ``;
@@ -98,7 +109,11 @@ interface ReportCardProps {
 }
 
 function ReportCard({ r, onEdit, onDelete }: ReportCardProps) {
+<<<<<<< HEAD
   const coachClass = r.coach.includes('Bani') ? 'coach-bani' : r.coach.includes('Argy') ? 'coach-argy' : 'coach-zaura';
+=======
+  const coachClass = r.coach.includes('Bani') ? 'coach-bani' : 'coach-argy';
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   return (
     <div className={`glass-card rounded-2xl p-4 border-none shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 schedule-entry ${coachClass}`}>
       <div className="flex items-start justify-between gap-3">
@@ -183,9 +198,14 @@ function ReportForm({
   initial?: Partial<ActivityReport>;
   onSubmit: (data: Omit<ActivityReport, 'id' | 'createdAt'>, files: File[]) => Promise<void>;
   submitLabel: string;
+<<<<<<< HEAD
   onSaveAndShare?: (data: Omit<ActivityReport, 'id' | 'createdAt'>, files: File[], waWindow?: Window | null) => Promise<void>;
 }) {
   const { schedule } = useSchedule();
+=======
+  onSaveAndShare?: (data: Omit<ActivityReport, 'id' | 'createdAt'>, files: File[]) => Promise<void>;
+}) {
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   const [studentName, setStudentName] = useState(initial?.studentName || '');
   const [date, setDate] = useState(initial?.date || '');
   const [level, setLevel] = useState(initial?.level || '');
@@ -201,6 +221,7 @@ function ReportForm({
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
+<<<<<<< HEAD
   // Ambil daftar nama murid aktif unik dari jadwal
   const activeStudentNames = Array.from(
     new Set(
@@ -251,6 +272,8 @@ function ReportForm({
     }
   }, [initial, schedule]);
 
+=======
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
   const resetForm = () => {
     setStudentName(''); setDate(''); setLevel(''); setLessonWeek('');
     setLessonName(''); setTools(''); setCoach(''); setCoachComment('');
@@ -286,6 +309,7 @@ function ReportForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Nama Murid *</Label>
+<<<<<<< HEAD
           <Select value={studentName} onValueChange={handleStudentChange}>
             <SelectTrigger className="bg-background">
               <SelectValue placeholder={dropdownOptions.length > 0 ? "Pilih nama murid" : "Memuat daftar murid..."} />
@@ -298,6 +322,9 @@ function ReportForm({
               ))}
             </SelectContent>
           </Select>
+=======
+          <Input value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Nama murid" />
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
         </div>
         <div className="space-y-2">
           <Label>Tanggal *</Label>
@@ -428,7 +455,11 @@ function ReportForm({
               }
 
               setUploading(true);
+<<<<<<< HEAD
               await onSaveAndShare(
+=======
+              await (onSaveAndShare as any)(
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
                 {
                   studentName, date, level,
                   lessonWeek: parseInt(lessonWeek),
@@ -462,6 +493,7 @@ export default function ReportsAdminPage() {
   const { reports, loading: reportsLoading, addReport, updateReport, deleteReport } = useActivityReports();
   const { codes, generateCode, deleteCode } = useAccessCodes();
   const { toast } = useToast();
+<<<<<<< HEAD
   const [searchParams] = useSearchParams();
   const initialStudent = searchParams.get('student');
   const [activeTab, setActiveTab] = useState('history');
@@ -471,6 +503,8 @@ export default function ReportsAdminPage() {
       setActiveTab('create');
     }
   }, [initialStudent]);
+=======
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
   const [editingReport, setEditingReport] = useState<ActivityReport | null>(null);
   const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
@@ -705,9 +739,16 @@ export default function ReportsAdminPage() {
           </div>
         </div>
 
+<<<<<<< HEAD
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex justify-start overflow-x-hidden">
             <TabsList className="bg-muted/50 p-1 rounded-xl h-auto border border-border/50 flex-wrap justify-start">
+=======
+        <Tabs defaultValue="history" className="space-y-6">
+          <div className="flex justify-start overflow-x-hidden">
+            <TabsList className="bg-muted/50 p-1 rounded-xl h-auto border border-border/50 flex-wrap justify-start">
+
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
               <TabsTrigger value="history" className="px-6 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold gap-2">
                 <Table className="w-4 h-4" /> Riwayat
               </TabsTrigger>
@@ -733,7 +774,11 @@ export default function ReportsAdminPage() {
                 <FileText className="w-5 h-5 text-primary" />
                 Buat Activity Report Baru
               </h2>
+<<<<<<< HEAD
               <ReportForm initial={initialStudent ? { studentName: initialStudent } : undefined} onSubmit={handleCreateReport} submitLabel="Simpan Report" onSaveAndShare={handleCreateAndShare} />
+=======
+              <ReportForm onSubmit={handleCreateReport} submitLabel="Simpan Report" onSaveAndShare={handleCreateAndShare} />
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
             </div>
           </TabsContent>
 
@@ -1090,7 +1135,11 @@ export default function ReportsAdminPage() {
                                     key={week}
                                     onClick={() => setEditingReport({
                                       id: '',
+<<<<<<< HEAD
                                       studentName: openFolder || '',
+=======
+                                      studentName: openFolder,
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
                                       date: new Date().toISOString().split('T')[0],
                                       level: studentReports[0]?.level || '',
                                       lessonWeek: week,
@@ -1103,7 +1152,11 @@ export default function ReportsAdminPage() {
                                       mediaUrls: [],
                                       externalLinks: [],
                                       createdAt: '',
+<<<<<<< HEAD
                                     } as ActivityReport)}
+=======
+                                    } as any)}
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
                                     title={`Klik untuk upload report Week ${week}`}
                                     className="text-[10px] font-black px-2.5 py-1 rounded-full bg-red-100 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all cursor-pointer"
                                   >

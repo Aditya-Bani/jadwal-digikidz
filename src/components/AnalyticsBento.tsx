@@ -22,7 +22,11 @@ export function AnalyticsBento({ schedule }: AnalyticsBentoProps) {
     // Clean Scholar Professional Colors
     const COLORS = ['#2563eb', '#8b5cf6', '#f59e0b', '#10b981']; // Blue 600, Violet 500, Amber 500, Emerald 500
 
+<<<<<<< HEAD
     const CustomBarTooltip = ({ active, payload }: { active?: boolean; payload?: { value: number; payload: { fullName: string } }[] }) => {
+=======
+    const CustomBarTooltip = ({ active, payload }: any) => {
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
         if (active && payload && payload.length) {
             return (
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl shadow-lg">
@@ -38,7 +42,11 @@ export function AnalyticsBento({ schedule }: AnalyticsBentoProps) {
         return null;
     };
 
+<<<<<<< HEAD
     const CustomPieTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number; payload: { fill: string } }[] }) => {
+=======
+    const CustomPieTooltip = ({ active, payload }: any) => {
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
         if (active && payload && payload.length) {
             return (
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl shadow-lg">

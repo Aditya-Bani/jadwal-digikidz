@@ -9,7 +9,11 @@ import { NotificationManager } from '@/components/NotificationManager';
 import { NotificationHistory } from '@/components/NotificationHistory';
 import { useSchedule } from '@/hooks/useSchedule';
 import { useNotifications } from '@/hooks/useNotifications';
+<<<<<<< HEAD
 import { ScheduleEntry, DayOfWeek, TimeSlot, Coach, COACHES, DAY_LABELS } from '@/types/schedule';
+=======
+import { ScheduleEntry, DayOfWeek, TimeSlot, Coach, COACHES } from '@/types/schedule';
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 import { Plus, Filter, X, Eye, EyeOff, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -17,8 +21,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
+<<<<<<< HEAD
 import { getDisplayName } from '@/lib/displayNames';
 import { Link } from 'react-router-dom';
+=======
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
 
 import { WelcomeHero } from '@/components/WelcomeHero';
@@ -31,6 +38,7 @@ const Index = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
+<<<<<<< HEAD
   const displayedCoachName = user?.user_metadata?.full_name || getDisplayName(user?.email || '') || 'Coach';
 
   const getSystemDayString = (): DayOfWeek => {
@@ -55,6 +63,10 @@ const Index = () => {
       (isEC || entry.coach === displayedCoachName)
   );
   const sortedTodaySchedule = [...todaySchedule].sort((a, b) => a.time.localeCompare(b.time));
+=======
+  const coachName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Coach';
+  const displayedCoachName = coachName.split(/[._-]/).map((w: any) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
   // Toast logic for new notifications
   const toastedIds = useRef<Set<string>>(new Set());
@@ -162,7 +174,16 @@ const Index = () => {
   };
 
   const handleSave = (data: Omit<ScheduleEntry, 'id'>) => {
+<<<<<<< HEAD
     const adminName = user?.user_metadata?.full_name || getDisplayName(user?.email || '') || 'Coach';
+=======
+    // Get actual name from user metadata or format from email (e.g. "bani.coach@..." -> "Bani Coach")
+    const rawId = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Coach';
+    const adminName = rawId
+      .split(/[._-]/)
+      .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
 
     const auditData = { ...data, updatedBy: adminName };
 
@@ -207,6 +228,7 @@ const Index = () => {
         <RunningText messages={activeNotifications.filter(n => !n.message.startsWith('[PARENT]')).map((n) => n.message)} />
 
         {/* Main Content Tabs */}
+<<<<<<< HEAD
         <Tabs defaultValue="hari-ini" className="w-full mt-8">
           <TabsList className="mb-6 bg-slate-100/50 dark:bg-slate-800/50 p-1 w-full justify-start overflow-x-auto overflow-y-hidden flex-nowrap no-scrollbar rounded-xl">
             <TabsTrigger value="hari-ini" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm px-4 sm:px-6 shrink-0 font-bold gap-1.5">
@@ -220,12 +242,25 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger value="notifikasi" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm px-4 sm:px-6 gap-2 shrink-0 font-bold">
               📢 Pesan & Update
+=======
+        <Tabs defaultValue="jadwal" className="w-full mt-8">
+          <TabsList className="mb-6 bg-slate-100/50 dark:bg-slate-800/50 p-1 w-full justify-start overflow-x-auto overflow-y-hidden flex-nowrap no-scrollbar">
+            <TabsTrigger value="jadwal" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm px-4 sm:px-6 shrink-0">
+              Jadwal Mengajar
+            </TabsTrigger>
+            <TabsTrigger value="statistik" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm px-4 sm:px-6 shrink-0">
+              Ringkasan & Statistik
+            </TabsTrigger>
+            <TabsTrigger value="notifikasi" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm px-4 sm:px-6 gap-2 shrink-0">
+              Pesan & Update
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
               {activeNotifications.filter(n => !n.message.startsWith('[PARENT]') && !n.readBy.includes(displayedCoachName)).length > 0 && (
                 <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
               )}
             </TabsTrigger>
           </TabsList>
 
+<<<<<<< HEAD
           <TabsContent value="hari-ini" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
             <div className="glass-card p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-border/50">
@@ -312,6 +347,8 @@ const Index = () => {
             </div>
           </TabsContent>
 
+=======
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
           <TabsContent value="notifikasi" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
               <div className="space-y-1">
@@ -453,10 +490,13 @@ const Index = () => {
                 <div className="w-4 h-4 rounded bg-[hsl(var(--coach-argy)/0.3)] border-l-4 border-[hsl(var(--coach-argy))]" />
                 <span className="text-sm text-muted-foreground">Mr. Argy</span>
               </div>
+<<<<<<< HEAD
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded bg-[hsl(var(--coach-zaura)/0.3)] border-l-4 border-[hsl(var(--coach-zaura))]" />
                 <span className="text-sm text-muted-foreground">Ms. Zaura</span>
               </div>
+=======
+>>>>>>> 01b64abd17847f213ed541d744ad0a933d2affa7
               <div className="w-px h-4 bg-border" />
               <div className="flex items-center gap-2">
                 <span className="level-badge level-little-creator">Little Creator</span>
