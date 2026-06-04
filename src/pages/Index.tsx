@@ -242,7 +242,26 @@ const Index = () => {
                 </div>
               </div>
 
-              {sortedTodaySchedule.length === 0 ? (
+              {scheduleLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="glass-card p-5 rounded-2xl space-y-4 border border-border/50">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-6 w-3/4 rounded-lg" />
+                          <Skeleton className="h-3 w-1/2 rounded-full" />
+                        </div>
+                        <Skeleton className="h-8 w-20 rounded-lg" />
+                      </div>
+                      <Skeleton className="h-5 w-24 rounded-full" />
+                      <Skeleton className="h-10 w-full rounded-xl" />
+                      <div className="mt-5 pt-4 border-t border-border/20">
+                        <Skeleton className="h-11 w-full rounded-xl" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : sortedTodaySchedule.length === 0 ? (
                 <div className="text-center py-12 space-y-4">
                   <div className="text-4xl">🎉</div>
                   <h3 className="text-lg font-bold text-foreground">Tidak Ada Jadwal Mengajar</h3>

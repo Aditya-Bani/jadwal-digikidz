@@ -39,26 +39,23 @@ function dbToApp(row: DbScheduleEntry): ScheduleEntry {
       if (isDate) {
         startDate = pendingValue;
 
-        // H-3 Activation Logic:
+        // H-0 Activation Logic (Active on start date):
         const startDateObj = new Date(pendingValue + 'T00:00:00');
-        const h3Date = new Date(startDateObj);
-        h3Date.setDate(startDateObj.getDate() - 3);
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         startDateObj.setHours(0, 0, 0, 0);
-        h3Date.setHours(0, 0, 0, 0);
 
-        if (today >= h3Date) {
-          status = 'active'; // Automatically active starting from H-3
+        if (today >= startDateObj) {
+          status = 'active'; // Automatically active starting from H-0
           isActive = true;
         } else {
-          status = 'pending'; // Pending before H-3
+          status = 'pending'; // Pending before H-0
           isActive = true;    // Visible in weekly grid under Sembunyikan Nonaktif
         }
         
         // Friendly local date label (e.g. "Mulai 23 Jun 2026")
-        inactiveReason = `Mulai ${new Date(pendingValue).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+        inactiveReason = `Mulai ${startDateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}`;
       } else {
         status = 'pending';
         isActive = true;
