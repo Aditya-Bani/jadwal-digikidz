@@ -18,7 +18,7 @@ export interface LevelGroupResponse {
  * and splits each level into two halves of 8 weeks each.
  * Also captures trial reports (lessonWeek === 0).
  */
-export function groupReportsByLevel(reports: ActivityReport[]): LevelGroupResponse {
+export function groupReportsByLevel(reports: ActivityReport[], forceTotalLevels?: number): LevelGroupResponse {
   const sorted = [...reports].sort((a, b) => a.lessonWeek - b.lessonWeek);
   
   // Extract trial
@@ -26,7 +26,11 @@ export function groupReportsByLevel(reports: ActivityReport[]): LevelGroupRespon
   const actualReports = sorted.filter(r => r.lessonWeek > 0);
   
   const maxWeek = actualReports.length > 0 ? Math.max(...actualReports.map((r) => r.lessonWeek)) : 0;
-  const totalLevels = Math.max(1, Math.ceil(maxWeek / 16));
+  let totalLevels = Math.max(1, Math.ceil(maxWeek / 16));
+  
+  if (forceTotalLevels !== undefined && forceTotalLevels > 0) {
+    totalLevels = Math.max(totalLevels, forceTotalLevels);
+  }
 
   const levels = Array.from({ length: totalLevels }, (_, i) => {
     const start = i * 16 + 1;

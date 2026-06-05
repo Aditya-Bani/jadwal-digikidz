@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Digikidz - Parent Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        
+        .glass-modal {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            box-shadow: 0 20px 50px rgba(0, 0, 198, 0.08);
+        }
+    </style>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-secondary": "#ffffff",
+                "on-secondary-fixed-variant": "#783200",
+                "secondary": "#9d4300",
+                "primary-container": "#2563eb",
+                "surface-dim": "#d8dadc",
+                "secondary-fixed": "#ffdbca",
+                "inverse-surface": "#2d3133",
+                "error": "#ba1a1a",
+                "on-primary-fixed-variant": "#003ea8",
+                "on-surface-variant": "#434655",
+                "surface-bright": "#f7f9fb",
+                "surface-container": "#eceef0",
+                "on-error-container": "#93000a",
+                "on-primary-container": "#eeefff",
+                "on-error": "#ffffff",
+                "surface-container-high": "#e6e8ea",
+                "on-tertiary": "#ffffff",
+                "on-background": "#191c1e",
+                "background": "#f7f9fb",
+                "tertiary-fixed-dim": "#4ae176",
+                "on-secondary-fixed": "#341100",
+                "surface": "#f7f9fb",
+                "surface-container-highest": "#e0e3e5",
+                "primary-fixed-dim": "#b4c5ff",
+                "error-container": "#ffdad6",
+                "on-primary-fixed": "#00174b",
+                "on-surface": "#191c1e",
+                "tertiary": "#006229",
+                "surface-container-lowest": "#ffffff",
+                "surface-tint": "#0053db",
+                "outline": "#737686",
+                "on-secondary-container": "#5c2400",
+                "inverse-primary": "#b4c5ff",
+                "tertiary-container": "#007e37",
+                "on-primary": "#ffffff",
+                "secondary-container": "#fd761a",
+                "primary": "#004ac6",
+                "on-tertiary-fixed": "#002109",
+                "on-tertiary-container": "#c1ffc5",
+                "outline-variant": "#c3c6d7",
+                "on-tertiary-fixed-variant": "#005321",
+                "inverse-on-surface": "#eff1f3",
+                "surface-variant": "#e0e3e5",
+                "surface-container-low": "#f2f4f6",
+                "tertiary-fixed": "#6bff8f",
+                "primary-fixed": "#dbe1ff",
+                "secondary-fixed-dim": "#ffb690"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "gutter": "24px",
+                "margin-mobile": "16px",
+                "margin-desktop": "40px",
+                "base": "8px",
+                "container-padding": "32px"
+        },
+        "fontFamily": {
+                "display-lg": [
+                        "Inter"
+                ],
+                "headline-lg": [
+                        "Inter"
+                ],
+                "label-sm": [
+                        "Inter"
+                ],
+                "label-md": [
+                        "Inter"
+                ],
+                "body-lg": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Inter"
+                ],
+                "body-md": [
+                        "Inter"
+                ]
+        },
+        "fontSize": {
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "56px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-sm": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "label-md": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-orange-50 text-on-background font-body-md min-h-screen relative antialiased selection:bg-primary-container selection:text-on-primary-container transition-colors duration-300">
+<!-- App View Container -->
+<div class="relative w-full h-full min-h-screen overflow-x-hidden" id="app-container">
+<!-- ==================== VIEW 1: LOGIN ==================== -->
+<section class="absolute inset-0 flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop z-10 transition-opacity duration-500 opacity-100" id="login-view">
+<div class="glass-modal w-full max-w-md rounded-2xl p-8 md:p-12 flex flex-col items-center text-center shadow-xl border border-white/50">
+<!-- Brand Logo -->
+<div class="mb-8">
+<img alt="Digikidz Logo" class="h-16 w-auto object-contain mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl73FuDDV0rZxaurjXddnkE5LCDDLBWNnYIqJ77wrpdTvsNdpBi3BuU5t7yh83yDmNtt53wgIlMT9ao2VIhnLcPH2JPXudniW5mXuOFq6HS58KpT5jzmgychDZZXV0i5WdJU69jYrbiRgr9e9DCwYT3W4BhhQSzt4f02uxRphJtIpweut0fTlCay5E8FmnhT9DDb0BwalpHUOLvRcFlpQvHbvC3fDz0i3vS882iAt5b9fGAAYSjjRwObnJGKn7G_5FbwBZeVnyEKI"/>
+</div>
+<h1 class="text-headline-lg font-headline-lg text-primary mb-2">Welcome Parents</h1>
+<p class="text-body-md font-body-md text-on-surface-variant mb-8">Enter your unique access code to view your child's progress.</p>
+<form class="w-full flex flex-col gap-6" id="login-form" onsubmit="event.preventDefault(); switchView();">
+<div class="flex justify-center mb-[-1rem] z-20">
+<img alt="Digikidz Mascot" class="h-20 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU3bbbkmm2tEakcrlWIrsdFhar29r3saxCqLN-avV90P4XYkEKybbuNzrlLjKxOECkLDuePYfUFZtRvLJ6tWEq13o6ab6ndZKrfYqz8jvGbTnoX-rykHdHle3IdKmYeI08TzCtuaEtgQgbjnIMt6D5Wg7A58hcIU8hFx-MtJ0CTrBx6ihXgbkamgCvVWqYbE6c1dh1xHJ2qFhmNGxEo59Ejf3KpJRmRtT2g3PC1nEZnHhrDgY1soTVlaod2plk517ju1uJeiAx71g"/>
+</div>
+<div class="relative w-full group">
+<label class="absolute -top-2.5 left-3 bg-white px-1 text-label-sm font-label-sm text-primary z-10 rounded" for="access-code">Access Code</label>
+<div class="glass-panel bg-white rounded-lg w-full flex items-center px-4 py-3 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<span class="material-symbols-outlined text-outline-variant mr-3 group-focus-within:text-primary">lock</span>
+<input class="w-full bg-transparent border-none outline-none text-body-lg font-body-lg tracking-widest text-center text-on-surface placeholder:text-outline-variant placeholder:tracking-normal focus:ring-0" id="access-code" placeholder="Enter PIN (e.g. 12345)" required="" type="password"/>
+</div>
+</div>
+<button class="w-full bg-primary hover:bg-primary-fixed-variant text-on-primary rounded-lg py-4 text-label-md font-label-md shadow-md shadow-primary/30 transition-transform active:scale-95 flex items-center justify-center gap-2" type="submit">
+<span>Access Portal</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</form>
+<div class="mt-8 text-label-sm font-label-sm text-on-surface-variant">
+                    Need help? <a class="text-primary hover:underline font-semibold" href="#">Contact Support</a>
+</div>
+</div>
+</section>
+<!-- ==================== VIEW 2: DASHBOARD ==================== -->
+<section class="absolute inset-0 flex flex-col md:flex-row z-0 opacity-0 pointer-events-none transition-opacity duration-500 hidden" id="dashboard-view">
+<!-- Side Navigation (Shared Component Integration for Dashboard) -->
+<aside class="hidden md:flex flex-col h-full w-64 fixed left-0 top-0 z-50 bg-white/80 dark:bg-inverse-surface/80 backdrop-blur-2xl border-r border-white/30 dark:border-white/10 shadow-lg p-6 gap-2">
+<!-- Brand Anchor -->
+<div class="flex items-center gap-4 mb-10 px-2">
+<img alt="Digikidz Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl73FuDDV0rZxaurjXddnkE5LCDDLBWNnYIqJ77wrpdTvsNdpBi3BuU5t7yh83yDmNtt53wgIlMT9ao2VIhnLcPH2JPXudniW5mXuOFq6HS58KpT5jzmgychDZZXV0i5WdJU69jYrbiRgr9e9DCwYT3W4BhhQSzt4f02uxRphJtIpweut0fTlCay5E8FmnhT9DDb0BwalpHUOLvRcFlpQvHbvC3fDz0i3vS882iAt5b9fGAAYSjjRwObnJGKn7G_5FbwBZeVnyEKI"/>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 flex flex-col gap-2">
+<!-- Active State -->
+<a class="flex items-center gap-3 bg-primary text-on-primary rounded-lg px-4 py-3 shadow-md shadow-primary/20 scale-98 transition-transform" href="#">
+<span class="material-symbols-outlined" data-weight="fill">dashboard</span>
+<span class="text-label-md font-label-md">Overview</span>
+</a>
+<!-- Inactive States -->
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-label-md font-label-md">Activity Reports</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">workspace_premium</span>
+<span class="text-label-md font-label-md">Certificates</span>
+</a>
+</nav>
+<!-- Footer Nav -->
+<div class="flex flex-col gap-2 mt-auto border-t border-outline-variant/30 pt-4">
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 hover:bg-surface-container-high dark:hover:bg-surface-variant/20 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-label-md font-label-md">Help Center</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 hover:bg-error-container/50 text-error rounded-lg transition-all" href="#" onclick="switchView()">
+<span class="material-symbols-outlined text-error">logout</span>
+<span class="text-label-md font-label-md text-error">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen overflow-y-auto">
+<!-- Mobile Top Bar -->
+<header class="md:hidden flex justify-between items-center mb-8 glass-panel rounded-xl p-4 sticky top-4 z-40">
+<img alt="Digikidz Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl73FuDDV0rZxaurjXddnkE5LCDDLBWNnYIqJ77wrpdTvsNdpBi3BuU5t7yh83yDmNtt53wgIlMT9ao2VIhnLcPH2JPXudniW5mXuOFq6HS58KpT5jzmgychDZZXV0i5WdJU69jYrbiRgr9e9DCwYT3W4BhhQSzt4f02uxRphJtIpweut0fTlCay5E8FmnhT9DDb0BwalpHUOLvRcFlpQvHbvC3fDz0i3vS882iAt5b9fGAAYSjjRwObnJGKn7G_5FbwBZeVnyEKI"/>
+<button class="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors" onclick="switchView()">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</header>
+<div class="max-w-5xl mx-auto space-y-8">
+<!-- Announcement Banner -->
+<div class="glass-panel bg-white/60 rounded-xl p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4 border-l-4 border-secondary-container">
+<div class="bg-secondary-container/20 p-3 rounded-full flex-shrink-0 text-secondary-container">
+<span class="material-symbols-outlined" data-weight="fill">campaign</span>
+</div>
+<div class="flex-1">
+<h3 class="text-label-md font-label-md text-on-surface font-bold">Upcoming: Summer Coding Camp</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">Enrollment for our advanced robotics and python summer camp opens next week. Early bird discounts apply!</p>
+</div>
+<button class="shrink-0 text-primary hover:text-primary-container text-label-md font-label-md flex items-center gap-1 transition-colors">
+                            View Details <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Child Profile Card (Left Col - Span 4) -->
+<div class="md:col-span-4 flex flex-col gap-6">
+<div class="glass-panel bg-white/60 rounded-2xl p-6 flex flex-col items-center text-center h-full relative overflow-hidden">
+<!-- Decorative bg element -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-fixed rounded-full blur-3xl opacity-50 z-0"></div>
+<div class="relative z-10 w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md mb-4 bg-surface-variant">
+<img alt="Profile Picture" class="w-full h-full object-cover" data-alt="A smiling young boy wearing glasses and a blue t-shirt, looking directly at the camera with an enthusiastic expression. Bright, natural lighting typical of an indoor educational setting, modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPzLGfQX-NJ5C-rG26wK1yoLEoMLJB6WNISBAWdB6fumlF_x0ZdOLdhwh-1flMHP3n13QTAFfxfUtTtqvAChiL93oIenCvL_P03e6qyt0mnVIF9JKn7E2nROA5j8ljRRzbBNu3pG4K07WP_dblgq6jT1Dd4z-p6Rl0f4-ZawF3rE0FdzAWNeP9z3w80jek2YTh47tiLdYZ2ehHTMi_FwQnJ7Th7KGdj-Y0Qh_EdJ8UU9wlrA1-V0FMSiKOojlOS8sl2aHWy2419J8"/>
+</div>
+<h2 class="text-headline-md font-headline-md text-on-surface mb-1 z-10">Leo Parker</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mb-4 z-10">Age 10 • Robotics Beginner</p>
+<div class="flex flex-wrap justify-center gap-2 z-10 w-full mb-6">
+<span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-label-sm font-label-sm font-bold">Python Lv 1</span>
+<span class="px-3 py-1 bg-secondary-container/10 text-secondary-container rounded-full text-label-sm font-label-sm font-bold">Lego Wedo</span>
+</div>
+<div class="mt-auto w-full glass-panel bg-white/80 rounded-lg p-4 flex justify-between items-center z-10">
+<div class="text-left">
+<div class="text-label-sm font-label-sm text-on-surface-variant">Attendance</div>
+<div class="text-headline-md font-headline-md text-primary font-bold">95%</div>
+</div>
+<div class="text-right">
+<div class="text-label-sm font-label-sm text-on-surface-variant">Next Class</div>
+<div class="text-label-md font-label-md text-on-surface font-bold">Thu, 4PM</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Activity & Progress (Right Col - Span 8) -->
+<div class="md:col-span-8 flex flex-col gap-6">
+<!-- Activity Timeline -->
+<div class="glass-panel bg-white/60 rounded-2xl p-6 flex-1">
+<div class="flex justify-between items-center mb-6 border-b border-outline-variant/30 pb-4">
+<h3 class="text-headline-sm font-headline-sm text-on-surface flex items-center gap-2 font-bold text-xl">
+<span class="material-symbols-outlined text-primary">timeline</span>
+                                        Recent Activity
+                                    </h3>
+<button class="text-primary text-label-sm font-label-sm hover:underline font-semibold">View All</button>
+</div>
+<div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-outline-variant/50 before:to-transparent">
+<!-- Activity Item 1 -->
+<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+<div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-primary-container text-on-primary-container shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10">
+<span class="material-symbols-outlined text-sm" data-weight="fill">check_circle</span>
+</div>
+<div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] glass-panel bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-default">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-sm font-label-sm text-primary font-bold bg-primary/10 px-2 py-0.5 rounded">Project Completed</span>
+<time class="text-label-sm font-label-sm text-outline">Yesterday</time>
+</div>
+<h4 class="text-label-md font-label-md text-on-surface mb-2 font-bold">Line Follower Robot</h4>
+<p class="text-body-md font-body-md text-on-surface-variant text-sm mb-3">Leo successfully programmed his robot to follow a complex curved path using IR sensors.</p>
+<div class="rounded-lg overflow-hidden h-32 relative bg-surface-variant">
+<img alt="Robot Project" class="w-full h-full object-cover" data-alt="Close up of a small educational robot constructed from colorful plastic bricks and electronic components, positioned on a white surface with a thick black line drawn on it. Bright classroom lighting, high-tech learning environment aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKNzBgq0oNoTMuOz-5FHxaKG8Ckwi0BzP5rNbO1u0nyNSdIn4WysXc4cSEaGam77aMdpIY2wZ6NEety7bj7Kymt36ZMHO4H5ZhWs9uUcr9nQzV3CVjtWGqicXEzcCgqEC3vNSHSbJQoqdmgwmZROEEO0OiHMmbp8GX8iy8V3lm604oF0F-ENPruO4p1grroFazBkNG-KBD2OSCo8d1EM1sK7RPpFRwDJawVNh05CdSQjmxqpEVVc_HO90Ju9NrxDfupnP6_fKS1nk"/>
+</div>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+<div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-surface-variant text-on-surface-variant shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10">
+<span class="material-symbols-outlined text-sm">school</span>
+</div>
+<div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] glass-panel bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-default">
+<div class="flex justify-between items-start mb-2">
+<span class="text-label-sm font-label-sm text-secondary font-bold bg-secondary/10 px-2 py-0.5 rounded">Milestone</span>
+<time class="text-label-sm font-label-sm text-outline">Oct 12</time>
+</div>
+<h4 class="text-label-md font-label-md text-on-surface mb-1 font-bold">Passed Python Quiz 1</h4>
+<p class="text-body-md font-body-md text-on-surface-variant text-sm">Achieved 90% on basic syntax and loops.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Certificates Section (Bottom Full Width) -->
+<div class="glass-panel bg-white/60 rounded-2xl p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-headline-sm font-headline-sm text-on-surface flex items-center gap-2 font-bold text-xl">
+<span class="material-symbols-outlined text-tertiary">workspace_premium</span>
+                                Achievements &amp; Certificates
+                            </h3>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+<!-- Certificate Card 1 -->
+<div class="glass-panel bg-white border-outline-variant/50 rounded-xl p-4 flex items-center gap-4 hover:border-primary/50 hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="w-12 h-12 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-weight="fill">verified</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-label-md font-label-md text-on-surface truncate font-bold">Intro to Scratch</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Completed Sep 2023</p>
+</div>
+<button class="text-primary opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-primary/10">
+<span class="material-symbols-outlined text-sm">download</span>
+</button>
+</div>
+<!-- Placeholder for future -->
+<div class="border-2 border-dashed border-outline-variant/50 rounded-xl p-4 flex flex-col items-center justify-center text-center gap-2 bg-surface-container-lowest/50 text-outline h-full min-h-[5rem]">
+<span class="material-symbols-outlined opacity-50">lock</span>
+<span class="text-label-sm font-label-sm">Next: Robotics Basics</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full glass-panel bg-white/90 border-t-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-50 flex justify-around items-center px-4 pb-safe pt-2">
+<a class="flex flex-col items-center gap-1 p-2 text-primary" href="#">
+<span class="material-symbols-outlined" data-weight="fill">dashboard</span>
+<span class="text-[10px] font-label-sm">Overview</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px] font-label-sm">Reports</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">workspace_premium</span>
+<span class="text-[10px] font-label-sm">Certificates</span>
+</a>
+</nav>
+</section>
+</div>
+<script>
+        // Simple View Switching Logic for demonstration
+        function switchView() {
+            const loginView = document.getElementById('login-view');
+            const dashboardView = document.getElementById('dashboard-view');
+            
+            if (loginView.classList.contains('hidden') || loginView.style.opacity === '0') {
+                // Show Login, Hide Dashboard
+                dashboardView.style.opacity = '0';
+                setTimeout(() => {
+                    dashboardView.classList.add('hidden');
+                    dashboardView.classList.remove('pointer-events-auto');
+                    
+                    loginView.classList.remove('hidden');
+                    setTimeout(() => {
+                        loginView.style.opacity = '1';
+                        loginView.classList.add('pointer-events-auto');
+                        loginView.classList.remove('pointer-events-none');
+                    }, 50);
+                }, 500);
+            } else {
+                // Hide Login, Show Dashboard
+                loginView.style.opacity = '0';
+                loginView.classList.add('pointer-events-none');
+                loginView.classList.remove('pointer-events-auto');
+                
+                setTimeout(() => {
+                    loginView.classList.add('hidden');
+                    
+                    dashboardView.classList.remove('hidden');
+                    setTimeout(() => {
+                        dashboardView.style.opacity = '1';
+                        dashboardView.classList.add('pointer-events-auto');
+                        dashboardView.classList.remove('pointer-events-none');
+                    }, 50);
+                }, 500);
+            }
+        }
+    </script>
+</body></html>

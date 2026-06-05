@@ -45,7 +45,13 @@ export function usePrograms() {
     const partialMatch = programs.find(p => programName.startsWith(p.name) || p.name.startsWith(programName));
     if (partialMatch) return partialMatch.maxLevels;
 
-    return 6; // Default fallback
+    // Hardcoded fallback logic matching user specs:
+    const lowerName = programName.toLowerCase();
+    if (lowerName.includes('little creator')) return 3;
+    if (lowerName.includes('junior')) return 4;
+    if (lowerName.includes('teenager')) return 6;
+    
+    return 6; // Default fallback for unknown programs
   };
 
   return { programs, loading, getProgramLimit };

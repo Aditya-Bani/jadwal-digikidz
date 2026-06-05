@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Activity Reports | Digikidz</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed": "#00174b",
+                    "primary": "#004ac6",
+                    "tertiary-fixed-dim": "#4ae176",
+                    "outline-variant": "#c3c6d7",
+                    "surface-container": "#eceef0",
+                    "on-surface-variant": "#434655",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#ffdbca",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#002109",
+                    "error": "#ba1a1a",
+                    "background": "#f7f9fb",
+                    "error-container": "#ffdad6",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#2563eb",
+                    "tertiary": "#006229",
+                    "surface": "#f7f9fb",
+                    "on-secondary-container": "#5c2400",
+                    "surface-container-low": "#f2f4f6",
+                    "on-tertiary-fixed-variant": "#005321",
+                    "surface-dim": "#d8dadc",
+                    "tertiary-container": "#007e37",
+                    "on-secondary-fixed": "#341100",
+                    "surface-bright": "#f7f9fb",
+                    "surface-variant": "#e0e3e5",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "tertiary-fixed": "#6bff8f",
+                    "secondary-fixed-dim": "#ffb690",
+                    "secondary-container": "#fd761a",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "primary-fixed": "#dbe1ff",
+                    "outline": "#737686",
+                    "on-secondary-fixed-variant": "#783200",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-container-high": "#e6e8ea",
+                    "on-background": "#191c1e",
+                    "on-primary-container": "#eeefff",
+                    "inverse-primary": "#b4c5ff",
+                    "surface-tint": "#0053db",
+                    "secondary": "#9d4300",
+                    "on-tertiary-container": "#c1ffc5",
+                    "on-surface": "#191c1e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "base": "8px",
+                    "container-padding": "32px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "40px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .bg-mesh {
+            background-color: #f7f9fb;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 74, 198, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(74, 225, 118, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(253, 118, 26, 0.05) 0px, transparent 50%);
+        }
+        .active-pill {
+            background: #004ac6;
+            color: #ffffff;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-mesh min-h-screen text-on-surface font-body-md">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-surface-container/80 backdrop-blur-xl border-b border-white/40 dark:border-outline-variant/20 shadow-sm shadow-primary/5 flex justify-between items-center h-16 px-gutter">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center overflow-hidden border border-primary/10">
+<img alt="Mascot" class="w-8 h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhTf9XObR0bAjWtiyXYLRsLzvIJU3nz_6oR2FxPmZxe0So3VELCmKFduavxMgRwCs9r8VPGDZ714KXrZrsodFsRRqNe0m660Uk_juLztKfkppL-o-LH0L790vNarN3K-DvWSC4ImkzJWKVPBLe0xGIk1oUQUs2vRv2x9nbAPBdRljkCW6vMA5gfOSwZW180Q7WUjE5i1CMBShyx8nHHYItvny_lT0gV66Z7Qg7j_Xl2_8Gg49kf226tNAeiw86Bj0tsXmaXpo2smI"/>
+</div>
+<h1 class="font-display-lg text-headline-lg-mobile text-primary tracking-tight">Digikidz</h1>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary/5 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="pt-20 pb-24 px-4 max-w-lg mx-auto">
+<!-- Hero Section -->
+<section class="mb-8">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">Activity Reports</h2>
+<p class="font-body-md text-on-surface-variant">Track and share student progress.</p>
+</section>
+<!-- Statistics & Mascot Section -->
+<section class="mb-8 relative overflow-hidden glass-panel rounded-xl p-5 flex items-center justify-between">
+<div class="space-y-4 flex-1">
+<div class="flex items-center gap-3">
+<div class="bg-primary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary" data-icon="analytics">analytics</span>
+</div>
+<div>
+<p class="font-label-sm text-on-surface-variant">Reports Sent</p>
+<p class="font-headline-md text-headline-md text-primary">142 <span class="text-xs font-normal text-on-surface-variant">this week</span></p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-secondary-container/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-secondary" data-icon="edit_note">edit_note</span>
+</div>
+<div>
+<p class="font-label-sm text-on-surface-variant">Drafts</p>
+<p class="font-headline-md text-headline-md text-secondary">8</p>
+</div>
+</div>
+</div>
+<div class="w-24 h-24 flex-shrink-0">
+<img alt="Digikidz Mascot" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzs2Z9idacotKSOmDG9PTJi0DJypXHfDhaVGDzEc7GWME0CZEA8ZFMW_1xN7s5aVae7Oy-duCbWwfZrf5YT3YGnq1zVy4ztn8LSaL1nAeK64cSLftS4Yts9AWqtsGxvSn5H3CsGwMq5R8p8DnfQQ6lIdg4exERd3We8vsHuYR0QL8zCw-Cv7_p-z8LjJ2ViPnsL2KIJTt6A49IJiLOWEi4S0OtMqsxqLNqi9IrH56rMUBX9c3oOwSozllLzzhcDZccui8tevmf4QI"/>
+</div>
+</section>
+<!-- Filter Tabs -->
+<section class="mb-6 -mx-4">
+<div class="flex gap-2 overflow-x-auto px-4 hide-scrollbar">
+<button class="active-pill px-5 py-2 rounded-full font-label-md whitespace-nowrap shadow-sm">All Classes</button>
+<button class="bg-white/60 border border-outline-variant/30 px-5 py-2 rounded-full font-label-md whitespace-nowrap text-on-surface-variant hover:bg-white/80 transition-colors">Robotics 101</button>
+<button class="bg-white/60 border border-outline-variant/30 px-5 py-2 rounded-full font-label-md whitespace-nowrap text-on-surface-variant hover:bg-white/80 transition-colors">Coding Kids</button>
+<button class="bg-white/60 border border-outline-variant/30 px-5 py-2 rounded-full font-label-md whitespace-nowrap text-on-surface-variant hover:bg-white/80 transition-colors">Digital Art</button>
+</div>
+</section>
+<!-- Report List -->
+<div class="space-y-4">
+<!-- Card 1 -->
+<article class="glass-card rounded-xl p-4 shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-3">
+<img alt="Leo Carter" class="w-12 h-12 rounded-2xl bg-surface-container border border-white" data-alt="A portrait-style illustration of a young boy with curly brown hair and a bright, excited expression. He is wearing a blue hoodie against a soft, blurred educational background with hints of colorful building blocks and modern technology gadgets. The lighting is bright and cheerful, emphasizing a positive learning environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAonI94qjtIg5dTXcKSsvIrg4OJlmF0WHj2P-L3OLMDl0-p9lSvprELfcQW1rMBxPQZ5_uy8neq5eF-grGecaFc1PUK0qdaYVaPF_33ZAeBTkx_JPvSEicjfDs42U0dHHTSq9xH_5WvjJQ8ZvBWBszrHSZiQSTgNntQ3gAO574IW5qgpwSgzzRG60z2mllp6dSDh2YzDvyyZ7aIXUu1I_ofSiEizuLKCmvp0j84eiK9qnTVJZMVF-D9vk5d0TVRe4Q2XdRElbgqg4M"/>
+<div>
+<h3 class="font-label-md text-on-surface">Leo Carter</h3>
+<p class="text-[10px] font-label-sm text-on-surface-variant uppercase tracking-wider">Oct 24, 2023</p>
+</div>
+</div>
+<span class="bg-tertiary-container/10 text-tertiary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">Coding</span>
+</div>
+<div class="mb-4">
+<h4 class="font-label-md text-on-surface mb-1">Introduction to Scratch Logic</h4>
+<p class="font-body-md text-on-surface-variant text-sm line-clamp-2">Leo successfully implemented his first loop today to animate a sprite's movement across the screen...</p>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-2.5 rounded-lg border border-primary/20 text-primary font-label-md hover:bg-primary/5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span>
+                        Edit
+                    </button>
+<button class="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-green-500 text-white font-label-md hover:bg-green-600 active:scale-95 transition-all shadow-md shadow-green-500/20">
+<span class="material-symbols-outlined text-[18px]" data-icon="share">share</span>
+                        WhatsApp
+                    </button>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="glass-card rounded-xl p-4 shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-3">
+<img alt="Mia Santos" class="w-12 h-12 rounded-2xl bg-surface-container border border-white" data-alt="A close-up digital painting of a young girl with pigtails and glasses, looking thoughtfully at a computer screen that reflects soft blue light onto her face. She is in a modern, clean classroom setting with translucent glass dividers and soft green accents. The overall atmosphere is focused and professional yet warm and encouraging for students." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4jqB1Z_73QphMgSKF2xOflH9vo8KFI8dVi-UTNfn2UIJbAkIUdfZyFh8wdOwzDTf41mNzpB8yTHoLk6b3-x1IBA9VkT5bBi20r5GguACBLTJNBrm9xW-fbHSEYfetg8coQ8FQctoPc7k8itlLgdsXtx5ywPNdgdHqAbp-kdr5gJxERkcQRUp039j9MTjWLSzlpCj6EtjkziLR-ixXq6V-Sknl1K5Jj7AjLKRHmxyi_PjlsvFBxnQB9DMf3GQvskXWOncU6EyvhFQ"/>
+<div>
+<h3 class="font-label-md text-on-surface">Mia Santos</h3>
+<p class="text-[10px] font-label-sm text-on-surface-variant uppercase tracking-wider">Oct 23, 2023</p>
+</div>
+</div>
+<span class="bg-secondary-container/10 text-secondary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">Digital Art</span>
+</div>
+<div class="mb-4">
+<h4 class="font-label-md text-on-surface mb-1">Color Theory &amp; Brushes</h4>
+<p class="font-body-md text-on-surface-variant text-sm line-clamp-2">Mia demonstrated a strong understanding of primary vs secondary colors in her digital landscape project...</p>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-2.5 rounded-lg border border-primary/20 text-primary font-label-md hover:bg-primary/5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span>
+                        Edit
+                    </button>
+<button class="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-green-500 text-white font-label-md hover:bg-green-600 active:scale-95 transition-all shadow-md shadow-green-500/20">
+<span class="material-symbols-outlined text-[18px]" data-icon="share">share</span>
+                        WhatsApp
+                    </button>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="glass-card rounded-xl p-4 shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-3">
+<img alt="Jordan Wu" class="w-12 h-12 rounded-2xl bg-surface-container border border-white" data-alt="An artistic digital portrait of a young student with short dark hair, wearing a white t-shirt and holding a small toy robot. The background features a high-tech lab with glowing blue light strips and transparent glass surfaces. The scene is bright and airy, capturing a moment of discovery and technical learning in a premium educational space." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkuh4T1ji71bJYADEWKuy29Eww4mn6yJ12kTeAQxO9ft9pxJpZgsG5RFdRUzejLxYDMJBwBsjXowVGF18EckOqMekk_MZbcCmclfaHQenE8nL0FIJDI1Kgxzcg_I_6eIneRid2UV5Q5PAucb5boz7lYo7Y9M_9LD_R7LqLkKR0-3hbgg8H61DPjwNzW8ajSWxCjrxynDQoaJ18MHl8QqEnt1YIrOx6zCNvO_NLg4r2EoIB3NhwYWcPQf7hFfwAnJxczIZxCRJjeGs"/>
+<div>
+<h3 class="font-label-md text-on-surface">Jordan Wu</h3>
+<p class="text-[10px] font-label-sm text-on-surface-variant uppercase tracking-wider">Oct 23, 2023</p>
+</div>
+</div>
+<span class="bg-primary-container/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">Robotics</span>
+</div>
+<div class="mb-4">
+<h4 class="font-label-md text-on-surface mb-1">Sensor Calibration Basics</h4>
+<p class="font-body-md text-on-surface-variant text-sm line-clamp-2">Today Jordan explored how ultrasonic sensors measure distance to avoid obstacles in a maze...</p>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-2.5 rounded-lg border border-primary/20 text-primary font-label-md hover:bg-primary/5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span>
+                        Edit
+                    </button>
+<button class="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-green-500 text-white font-label-md hover:bg-green-600 active:scale-95 transition-all shadow-md shadow-green-500/20">
+<span class="material-symbols-outlined text-[18px]" data-icon="share">share</span>
+                        WhatsApp
+                    </button>
+</div>
+</article>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-white/80 dark:bg-surface-container/80 backdrop-blur-xl rounded-t-xl border-t border-white/40 dark:border-outline-variant/20 shadow-lg shadow-primary/10 flex justify-around items-center h-20 pb-safe px-2">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+<span class="font-label-sm text-label-sm">Students</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-sm text-label-sm">Schedule</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/20 text-primary rounded-xl px-3 py-1.5 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-label-sm text-label-sm">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1.5 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+<span class="font-label-sm text-label-sm">Certificates</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for filter tabs
+        const filterButtons = document.querySelectorAll('button.font-label-md.whitespace-nowrap');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => {
+                    b.classList.remove('active-pill');
+                    b.classList.add('bg-white/60', 'text-on-surface-variant');
+                });
+                btn.classList.add('active-pill');
+                btn.classList.remove('bg-white/60', 'text-on-surface-variant');
+            });
+        });
+    </script>
+</body></html>

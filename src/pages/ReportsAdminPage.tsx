@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Header } from '@/components/Header';
+import { useState, useEffect, useMemo } from 'react';
 import { useActivityReports, useAccessCodes, uploadReportMedia, ActivityReport } from '@/hooks/useActivityReports';
 import { COACHES, LEVELS, Coach } from '@/types/schedule';
 import { useSchedule } from '@/hooks/useSchedule';
@@ -14,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Copy, Upload, FileText, Key, Pencil, FolderOpen, ChevronLeft, ChevronRight, Link as LinkIcon, ExternalLink, MessageSquare, Share2, Table, Download, Image, CalendarRange, ToggleLeft, ToggleRight, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Copy, Upload, FileText, Key, Pencil, FolderOpen, ChevronLeft, ChevronRight, Link as LinkIcon, ExternalLink, MessageSquare, Share2, Table, Download, Image, CalendarRange, ToggleLeft, ToggleRight, Sparkles, PlayCircle, User } from 'lucide-react';
 import { useHolidayBanners, uploadBannerImage } from '@/hooks/useHolidayBanners';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { groupReportsByLevel } from '@/lib/levelUtils';
@@ -98,76 +97,73 @@ interface ReportCardProps {
 }
 
 function ReportCard({ r, onEdit, onDelete }: ReportCardProps) {
-  const coachClass = r.coach.includes('Bani') ? 'coach-bani' : r.coach.includes('Argy') ? 'coach-argy' : 'coach-zaura';
   return (
-    <div className={`glass-card rounded-2xl p-4 border-none shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 schedule-entry ${coachClass}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1.5 min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="font-bold text-sm text-foreground">W{r.lessonWeek}: {r.lessonName}</p>
-            <span className={`level-badge ${r.level.startsWith('Little Creator') ? 'level-little-creator' :
-              r.level.startsWith('Junior') ? 'level-junior' :
-                r.level.startsWith('Teenager') ? 'level-teenager' : 'level-trial'
-              }`}>{r.level.split(' ').slice(0, 2).join(' ')}</span>
+    <article className="glass-card rounded-xl p-4 shadow-sm bg-white/70 backdrop-blur-md border border-white/50 relative group">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-white flex items-center justify-center text-slate-500 font-bold text-sm shrink-0">
+            {r.studentName.substring(0, 2).toUpperCase()}
           </div>
-          <p className="text-xs text-muted-foreground font-medium">
-            {new Date(r.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-            {' · '}{r.coach}
-          </p>
-          {r.tools && (
-            <p className="text-xs text-muted-foreground bg-muted/50 inline-block px-2 py-0.5 rounded-md">
-              🛠 {r.tools}
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-slate-900 truncate">{r.studentName}</h3>
+            <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+              {new Date(r.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
             </p>
-          )}
-          {r.coachComment && (
-            <p className="text-xs italic text-muted-foreground border-l-2 border-primary/30 pl-2 mt-1 line-clamp-2">
-              "{r.coachComment}"
-            </p>
-          )}
-          {r.externalLinks && r.externalLinks.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {r.externalLinks.map((link, i) => (
-                <a
-                  key={i}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 rounded-full border border-primary/10 hover:bg-primary/10 transition-colors"
-                >
-                  <LinkIcon className="h-2.5 w-2.5" />
-                  {link.label || 'Link'}
-                  <ExternalLink className="h-2 w-2 opacity-50" />
-                </a>
-              ))}
-            </div>
-          )}
+          </div>
         </div>
-        <div className="flex gap-1 shrink-0">
-          <Button variant="ghost" size="icon" onClick={() => shareToWhatsApp(r)} title="Share ke WhatsApp" className="h-8 w-8 rounded-lg hover:bg-green-50 hover:text-green-600 text-muted-foreground">
-            <MessageSquare className="h-3.5 w-3.5" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => onEdit(r)} className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary">
-            <Pencil className="h-3.5 w-3.5" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(r.id, r.studentName)} className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive">
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
-        </div>
+        <span className="bg-[#006229]/10 text-[#006229] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight shrink-0">
+          W{r.lessonWeek}
+        </span>
       </div>
-      {r.mediaUrls.length > 0 && (
-        <div className="flex gap-2 mt-3 flex-wrap">
+      <div className="mb-4">
+        <h4 className="text-sm font-semibold text-slate-900 mb-1 line-clamp-1">{r.lessonName}</h4>
+        <p className="text-sm text-slate-500 line-clamp-2 min-h-[2.5rem]">
+          {r.activityReportText || r.coachComment || "Tidak ada catatan."}
+        </p>
+      </div>
+      
+      {r.mediaUrls && r.mediaUrls.length > 0 && (
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
           {r.mediaUrls.map((url, i) => (
-            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="group">
-              <img
-                src={url}
-                alt={`Media ${i + 1}`}
-                className="h-14 w-14 object-cover rounded-xl border border-border group-hover:opacity-80 group-hover:scale-105 transition-all"
-              />
+            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+              {url.toLowerCase().match(/\.(mov|mp4|webm|ogg)$/) ? (
+                <div className="h-12 w-16 bg-slate-200 rounded-lg flex items-center justify-center text-slate-400">
+                  <PlayCircle className="w-5 h-5" />
+                </div>
+              ) : (
+                <img
+                  src={url}
+                  alt={`Media ${i + 1}`}
+                  className="h-12 w-16 object-cover rounded-lg border border-slate-200"
+                />
+              )}
             </a>
           ))}
         </div>
       )}
-    </div>
+
+      <div className="grid grid-cols-2 gap-3 mt-auto pt-2">
+        <button 
+          onClick={() => onEdit(r)}
+          className="flex items-center justify-center gap-2 py-2 rounded-lg border border-[#004ac6]/20 text-[#004ac6] text-sm font-semibold hover:bg-[#004ac6]/5 active:scale-95 transition-all"
+        >
+          <Pencil className="w-4 h-4" /> Edit
+        </button>
+        <button 
+          onClick={() => shareToWhatsApp(r)}
+          className="flex items-center justify-center gap-2 py-2 rounded-lg bg-[#25D366] text-white text-sm font-semibold hover:bg-[#20bd5a] active:scale-95 transition-all shadow-md shadow-[#25D366]/20"
+        >
+          <Share2 className="w-4 h-4" /> WhatsApp
+        </button>
+      </div>
+
+      <button 
+        onClick={() => onDelete(r.id, r.studentName)}
+        className="absolute top-2 right-2 p-1.5 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </article>
   );
 }
 
@@ -477,6 +473,7 @@ export default function ReportsAdminPage() {
   const [newCodeName, setNewCodeName] = useState('');
   const [searchStudent, setSearchStudent] = useState('');
   const [filterCoach, setFilterCoach] = useState('all');
+  const [filterLevel, setFilterLevel] = useState('all');
   const [searchCode, setSearchCode] = useState('');
   const [openFolder, setOpenFolder] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -519,7 +516,8 @@ export default function ReportsAdminPage() {
     const query = searchStudent.trim().toLowerCase();
     const matchesSearch = !searchStudent || sName.includes(query);
     const matchesCoach = filterCoach === 'all' || r.coach === filterCoach;
-    return matchesSearch && matchesCoach;
+    const matchesLevel = filterLevel === 'all' || (r.level && r.level.toLowerCase().includes(filterLevel.toLowerCase()));
+    return matchesSearch && matchesCoach && matchesLevel;
   });
 
   const handleCreateReport = async (data: Omit<ActivityReport, 'id' | 'createdAt'>, files: File[]) => {
@@ -640,31 +638,21 @@ export default function ReportsAdminPage() {
   const safePage = Math.min(currentPage, Math.max(totalPages, 1));
   const pagedNames = sortedNames.slice((safePage - 1) * REPORTS_PER_PAGE, safePage * REPORTS_PER_PAGE);
 
-  // Get the latest report per student for the Grid view
-  const latestFilteredReports = Object.values(
-    filteredReports.reduce((acc, r) => {
-      const existing = acc[r.studentName];
-      if (!existing) {
-        acc[r.studentName] = r;
-      } else {
-        const dateNew = new Date(r.date).getTime();
-        const dateOld = new Date(existing.date).getTime();
-        if (dateNew > dateOld) {
-          acc[r.studentName] = r;
-        } else if (dateNew === dateOld && r.lessonWeek > existing.lessonWeek) {
-          acc[r.studentName] = r;
-        }
-      }
-      return acc;
-    }, {} as Record<string, typeof reports[0]>)
-  ).sort((a, b) => a.studentName.localeCompare(b.studentName));
+  // Get the recent reports for the Grid view (sorted chronologically by created_at or date)
+  const recentReports = useMemo(() => {
+    return [...filteredReports].sort((a, b) => {
+      const timeA = new Date(a.createdAt || a.date).getTime();
+      const timeB = new Date(b.createdAt || b.date).getTime();
+      return timeB - timeA;
+    });
+  }, [filteredReports]);
 
   const exportToCSV = () => {
     // Definisi header
     const headers = ["Nama Murid", "Tingkat Kelas", "Minggu Ke"];
 
     // Mapping data ke bentuk array
-    const csvData = latestFilteredReports.map(r => [
+    const csvData = recentReports.map(r => [
       `"${r.studentName}"`,
       `"${r.level}"`,
       `"Week ${r.lessonWeek}"`
@@ -694,19 +682,20 @@ export default function ReportsAdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container mx-auto px-4 py-8 max-w-6xl animate-fade-in">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl lg:text-4xl font-black text-foreground tracking-tight">Activity <span className="text-primary">Reports</span></h1>
-            <p className="text-muted-foreground font-medium mt-1">Kelola laporan aktivitas murid dan kode akses orang tua.</p>
-          </div>
+    <>
+      {/* Page Header */}
+      <div className="hidden md:flex items-center justify-between bg-primary-fixed-dim/30 rounded-2xl p-6 relative overflow-hidden mb-8">
+        <div className="flex flex-col gap-1 relative z-10">
+          <h1 className="text-headline-lg font-headline-lg text-on-surface">Activity Reports</h1>
+          <p className="text-body-md font-body-md text-on-surface-variant">Manage and send student activity reports.</p>
         </div>
-
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-secondary rounded-full filter blur-[60px] opacity-20"></div>
+      </div>
+      
+      <div className="w-full">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="flex justify-start overflow-x-hidden">
-            <TabsList className="bg-muted/50 p-1 rounded-xl h-auto border border-border/50 flex-wrap justify-start">
+          <div className="flex justify-start overflow-x-auto hide-scrollbar pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+            <TabsList className="bg-muted/50 p-1 rounded-xl h-auto border border-border/50 flex-nowrap md:flex-wrap w-max justify-start shrink-0">
               <TabsTrigger value="history" className="px-6 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold gap-2">
                 <Table className="w-4 h-4" /> Riwayat
               </TabsTrigger>
@@ -797,65 +786,137 @@ export default function ReportsAdminPage() {
 
     {/* ── Tab: Riwayat (Grid view yang baru) ── */ }
     < TabsContent value = "history" className = "animate-fade-in" >
-            <div className="flex justify-end mb-4">
-              <Button onClick={exportToCSV} variant="outline" className="gap-2 font-bold shadow-sm shadow-primary/5 hover:bg-primary/5">
-                <Download className="w-4 h-4 text-green-600" />
-                Export ke Excel / CSV
-              </Button>
-            </div>
+            <div className="glass-card p-6 rounded-3xl border-none shadow-xl shadow-primary/5 mb-6">
+              {/* --- Mobile View: Hero, Stats & Search --- */}
+              <div className="md:hidden block mb-6">
+                <section className="mb-6">
+                  <h2 className="text-2xl font-bold text-foreground mb-1">Activity Reports</h2>
+                  <p className="text-sm text-muted-foreground">Track and share student progress.</p>
+                </section>
+                <section className="mb-6 relative overflow-hidden bg-white/60 backdrop-blur-md rounded-xl p-5 flex items-center justify-between shadow-sm border border-border/50">
+                  <div className="space-y-4 flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-[#004ac6]/10 p-2 rounded-lg">
+                        <Sparkles className="w-5 h-5 text-[#004ac6]" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Reports Sent</p>
+                        <p className="text-xl font-black text-slate-900">{reports.length}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-[#fd761a]/10 p-2 rounded-lg">
+                        <span className="material-symbols-outlined text-[#fd761a] text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>edit_note</span>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Drafts</p>
+                        <p className="text-xl font-black text-[#fd761a]">0</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-24 h-24 flex-shrink-0 mr-[-10px] mb-[-20px]">
+                    <img alt="Digikidz Mascot" className="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzs2Z9idacotKSOmDG9PTJi0DJypXHfDhaVGDzEc7GWME0CZEA8ZFMW_1xN7s5aVae7Oy-duCbWwfZrf5YT3YGnq1zVy4ztn8LSaL1nAeK64cSLftS4Yts9AWqtsGxvSn5H3CsGwMq5R8p8DnfQQ6lIdg4exERd3We8vsHuYR0QL8zCw-Cv7_p-z8LjJ2ViPnsL2KIJTt6A49IJiLOWEi4S0OtMqsxqLNqi9IrH56rMUBX9c3oOwSozllLzzhcDZccui8tevmf4QI" />
+                  </div>
+                </section>
+                <section className="mb-2">
+                  <div className="relative w-full mb-4">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari nama murid..."
+                      value={searchStudent} 
+                      onChange={(e) => setSearchStudent(e.target.value)}
+                      className="pl-9 bg-background/50 border-none h-11 w-full rounded-xl focus-visible:ring-1"
+                    />
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
+                    <button 
+                      onClick={() => setFilterLevel('all')}
+                      className={`px-5 py-2 rounded-full font-semibold text-[13px] whitespace-nowrap shadow-sm ${filterLevel === 'all' ? 'bg-[#004ac6] text-white' : 'bg-white/60 border border-slate-200 text-slate-500'}`}
+                    >Semua Jenjang</button>
+                    <button 
+                      onClick={() => setFilterLevel('Little Creator')}
+                      className={`px-5 py-2 rounded-full font-semibold text-[13px] whitespace-nowrap shadow-sm ${filterLevel === 'Little Creator' ? 'bg-[#004ac6] text-white' : 'bg-white/60 border border-slate-200 text-slate-500'}`}
+                    >Little Creator</button>
+                    <button 
+                      onClick={() => setFilterLevel('Junior')}
+                      className={`px-5 py-2 rounded-full font-semibold text-[13px] whitespace-nowrap shadow-sm ${filterLevel === 'Junior' ? 'bg-[#004ac6] text-white' : 'bg-white/60 border border-slate-200 text-slate-500'}`}
+                    >Junior</button>
+                    <button 
+                      onClick={() => setFilterLevel('Teenager')}
+                      className={`px-5 py-2 rounded-full font-semibold text-[13px] whitespace-nowrap shadow-sm ${filterLevel === 'Teenager' ? 'bg-[#004ac6] text-white' : 'bg-white/60 border border-slate-200 text-slate-500'}`}
+                    >Teenager</button>
+                  </div>
+                </section>
+              </div>
 
-            <div className="glass-card rounded-3xl border-none shadow-xl shadow-primary/5 mb-6 overflow-hidden">
-              <div className="p-0 overflow-x-auto max-h-[600px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-border/50 [&::-webkit-scrollbar-track]:bg-transparent">
-                <table className="w-full text-sm text-left border-collapse">
-                  <thead className="text-[13px] text-muted-foreground uppercase tracking-widest bg-muted sticky top-0 z-10 shadow-sm">
-                    <tr>
-                      <th className="px-6 py-5 font-black w-1/3 border-b border-border/50 rounded-tl-3xl">Nama Murid</th>
-                      <th className="px-6 py-5 font-black w-1/3 border-b border-border/50">Tingkat Kelas</th>
-                      <th className="px-6 py-5 font-black w-1/3 border-b border-border/50 rounded-tr-3xl">Minggu Terakhir</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/20 bg-background/50">
-                    {reportsLoading ? (
-                      [...Array(6)].map((_, idx) => (
-                        <tr key={`history-skeleton-${idx}`}>
-                          <td className="px-6 py-4"><Skeleton className="h-5 w-40" /></td>
-                          <td className="px-6 py-4"><Skeleton className="h-6 w-36 rounded-full" /></td>
-                          <td className="px-6 py-4"><Skeleton className="h-5 w-28" /></td>
-                        </tr>
-                      ))
-                    ) : latestFilteredReports.length === 0 ? (
-                      <tr>
-                        <td colSpan={3} className="px-6 py-12 text-center">
-                          <div className="flex flex-col items-center justify-center space-y-3 opacity-60">
-                            <Table className="w-10 h-10 text-muted-foreground mb-2" />
-                            <p className="text-sm font-bold text-foreground">Tidak ada riwayat murid.</p>
-                            <p className="text-xs text-muted-foreground">Laporan aktivitas yang Anda buat akan muncul di sini.</p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      latestFilteredReports.map((r) => (
-                        <tr key={r.id} className="group hover:bg-card hover:shadow-sm transition-all duration-300">
-                          <td className="px-6 py-4">
-                            <div className="font-bold text-foreground group-hover:text-primary transition-colors">{r.studentName}</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${r.level.startsWith('Little Creator') ? 'bg-pink-100 text-pink-700 border border-pink-200' :
-                              r.level.startsWith('Junior') ? 'bg-blue-100 text-blue-700 border border-blue-200' :
-                                r.level.startsWith('Teenager') ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' :
-                                  'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                              }`}>
-                              {r.level}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
-                            Week <span className="font-bold text-foreground">{r.lessonWeek}</span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+              {/* --- Desktop View: Headers & Stats --- */}
+              <div className="hidden md:flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div>
+                  <h2 className="text-3xl font-black text-foreground mb-2">Activity Reports</h2>
+                  <p className="text-muted-foreground font-medium">Track and share student progress with parents.</p>
+                </div>
+                <div className="flex items-end gap-4 relative">
+                  <Button onClick={() => setActiveTab('create')} className="bg-[#004ac6] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-[#004ac6]/30 hover:bg-[#003ea8] transition-all flex items-center justify-center gap-2 h-12">
+                    <FileText className="w-5 h-5" />
+                    Create New Report
+                  </Button>
+                </div>
+              </div>
+
+              <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div className="glass-panel p-4 rounded-xl flex items-center justify-between col-span-1 md:col-span-2 shadow-sm border border-border/50">
+                  <div className="relative w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari nama murid..."
+                      value={searchStudent} 
+                      onChange={(e) => setSearchStudent(e.target.value)}
+                      className="pl-9 bg-background/50 border-none h-10 w-full rounded-xl focus-visible:ring-1"
+                    />
+                  </div>
+                </div>
+                <div className="glass-panel p-4 rounded-xl flex items-center gap-4 col-span-1 shadow-sm border border-border/50">
+                  <div className="w-12 h-12 bg-blue-50 text-[#004ac6] rounded-xl flex items-center justify-center shrink-0">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Reports Sent</p>
+                    <p className="text-2xl font-black text-slate-900">{reports.length}</p>
+                  </div>
+                </div>
+                <div className="glass-panel p-4 rounded-xl flex items-center gap-4 col-span-1 shadow-sm border border-border/50">
+                  <div className="w-12 h-12 bg-amber-50 text-[#fd761a] rounded-xl flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>pending_actions</span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Drafts</p>
+                    <p className="text-2xl font-black text-slate-900">0</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reports Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {reportsLoading ? (
+                  [...Array(6)].map((_, idx) => (
+                    <div key={`history-skeleton-${idx}`} className="glass-card rounded-2xl p-4 space-y-4">
+                      <div className="flex gap-3"><Skeleton className="w-10 h-10 rounded-xl" /><div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-3 w-16" /></div></div>
+                      <Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-2/3" />
+                    </div>
+                  ))
+                ) : recentReports.length === 0 ? (
+                  <div className="col-span-full py-12 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-3 opacity-60">
+                      <Table className="w-10 h-10 text-muted-foreground mb-2" />
+                      <p className="text-sm font-bold text-foreground">Tidak ada riwayat laporan.</p>
+                      <p className="text-xs text-muted-foreground">Laporan aktivitas yang Anda buat akan muncul di sini.</p>
+                    </div>
+                  </div>
+                ) : (
+                  recentReports.slice(0, 50).map((r) => (
+                    <ReportCard key={r.id} r={r} onEdit={setEditingReport} onDelete={handleDeleteReport} />
+                  ))
+                )}
               </div>
             </div>
           </TabsContent >
@@ -1357,7 +1418,7 @@ onConfirm = {() => {
 }}
 studentName = { deletingReportName }
   />
-      </main >
-    </div >
+      </div>
+    </>
   );
 }

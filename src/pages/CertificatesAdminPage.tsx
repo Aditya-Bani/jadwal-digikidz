@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Header } from '@/components/Header';
 import { useCertificates, StudentCertificate } from '@/hooks/useCertificates';
 import { uploadReportMedia, useActivityReports } from '@/hooks/useActivityReports';
 import { groupReportsByLevel } from '@/lib/levelUtils';
@@ -333,13 +332,14 @@ export default function CertificatesAdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container mx-auto px-4 py-8 max-w-6xl animate-fade-in">
-        <div className="mb-8">
-          <h1 className="text-3xl lg:text-4xl font-black text-foreground tracking-tight">Manajemen <span className="text-primary">Sertifikat</span></h1>
-          <p className="text-muted-foreground font-medium mt-1">Upload dan kelola sertifikat kelulusan tercetak versi digital.</p>
+    <>
+      <div className="flex items-center justify-between bg-primary-fixed-dim/30 rounded-2xl p-6 relative overflow-hidden mb-8">
+        <div className="flex flex-col gap-1 relative z-10">
+          <h1 className="text-headline-lg font-headline-lg text-on-surface">Manajemen <span className="text-primary">Sertifikat</span></h1>
+          <p className="text-body-md font-body-md text-on-surface-variant">Upload dan kelola sertifikat kelulusan tercetak versi digital.</p>
         </div>
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary rounded-full filter blur-[60px] opacity-20"></div>
+      </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
@@ -684,7 +684,7 @@ export default function CertificatesAdminPage() {
             </div>
           )}
         </div>
-      </main>
+
 
       <DeleteConfirmDialog
         isOpen={!!deletingCertId}
@@ -742,6 +742,6 @@ export default function CertificatesAdminPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

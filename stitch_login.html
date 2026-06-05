@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login Coach | Digikidz</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Shared Style Guidance & Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#2563eb",
+                    "outline": "#737686",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#eff1f3",
+                    "on-secondary-container": "#5c2400",
+                    "outline-variant": "#c3c6d7",
+                    "error": "#ba1a1a",
+                    "on-surface": "#191c1e",
+                    "surface-tint": "#0053db",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-container": "#eeefff",
+                    "tertiary-fixed": "#6bff8f",
+                    "tertiary-fixed-dim": "#4ae176",
+                    "surface-container-low": "#f2f4f6",
+                    "on-secondary-fixed-variant": "#783200",
+                    "on-tertiary-fixed": "#002109",
+                    "on-primary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "error-container": "#ffdad6",
+                    "primary": "#004ac6",
+                    "on-tertiary-fixed-variant": "#005321",
+                    "surface-dim": "#d8dadc",
+                    "surface-container-high": "#e6e8ea",
+                    "surface": "#f7f9fb",
+                    "secondary-container": "#fd761a",
+                    "surface-container-highest": "#e0e3e5",
+                    "tertiary": "#006229",
+                    "secondary-fixed-dim": "#ffb690",
+                    "on-primary-fixed": "#00174b",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-surface-variant": "#434655",
+                    "on-secondary-fixed": "#341100",
+                    "background": "#f7f9fb",
+                    "on-tertiary-container": "#c1ffc5",
+                    "on-background": "#191c1e",
+                    "inverse-surface": "#2d3133",
+                    "tertiary-container": "#007e37",
+                    "on-error": "#ffffff",
+                    "secondary": "#9d4300",
+                    "inverse-primary": "#b4c5ff",
+                    "surface-bright": "#f7f9fb",
+                    "primary-fixed": "#dbe1ff",
+                    "secondary-fixed": "#ffdbca",
+                    "surface-variant": "#e0e3e5",
+                    "surface-container": "#eceef0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "40px",
+                    "base": "8px",
+                    "container-padding": "32px",
+                    "margin-mobile": "16px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f7f9fb 0%, #dbe1ff 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 50px rgba(0, 74, 198, 0.08);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .btn-premium-shine {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-premium-shine::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+
+        .btn-premium-shine:hover::after {
+            left: 120%;
+        }
+
+        .floating-mascot {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- Minimal Header (Supressed Shell as per UX Goal) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16">
+<a class="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="font-label-md text-label-md">Kembali ke Situs Utama</span>
+</a>
+<a class="text-outline hover:text-primary transition-colors font-label-md text-label-md" href="#">
+            Hubungi Support
+        </a>
+</header>
+<main class="flex-grow flex items-center justify-center px-margin-mobile py-24 relative overflow-hidden">
+<!-- Abstract Background Decorative Elements -->
+<div class="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-primary/10 rounded-full blur-3xl"></div>
+<div class="absolute bottom-[-10%] left-[-5%] w-[300px] h-[300px] bg-secondary-container/10 rounded-full blur-3xl"></div>
+<div class="relative w-full max-w-5xl flex flex-col md:flex-row items-center gap-gutter lg:gap-16">
+<!-- Welcome Column / Mascot -->
+<div class="hidden md:flex flex-col items-center md:items-start text-left flex-1 space-y-6">
+<div class="space-y-2">
+<h1 class="font-display-lg text-display-lg text-primary leading-tight">
+                        Halo,<br/>Coach Hebat!
+                    </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-sm">
+                        Siap untuk menginspirasi anak-anak kreatif hari ini? Masuk ke portal Anda untuk memulai petualangan edukasi digital.
+                    </p>
+</div>
+<div class="relative pt-8">
+<img alt="Mascot Digikidz" class="w-64 lg:w-80 floating-mascot" data-alt="A friendly, energetic cartoon mascot for a children's technology learning center. The mascot is a cute, high-tech robot child wearing a blue space suit with yellow boots and gloves, jumping joyfully in the air with a large smile. The art style is clean vector with bold outlines and vibrant primary colors, set against a soft, blurred light-mode educational background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwUg7q9oXSD9UnVVpdxjwiDleK1xohLxUnGZke_dXK91qXe72lVikGRMJcQrx2cIczyOzUaFEYkzS0FYDH_CWGjsJfmOqjKQmogpC71iOytFX-79befwPrFMg9LYWsb_iUI_uGK4flNkSmDOuIgFKuQ1UIkGdEwkizdfvNFk4RsL1zKRNBgkv6iITKgWmpmqO9W8Ha1io2lK0IUDL8tu3ZMYcfngAHnjEa1F5F2MTEFA9_FwJEckhdtJk5t-t9ypcjEUgMwt66Buo"/>
+<!-- Speech bubble interaction -->
+<div class="absolute -top-4 -right-12 glass-panel p-4 rounded-xl rounded-bl-none shadow-sm border-outline-variant/20 max-w-[180px]">
+<p class="font-label-sm text-label-sm text-primary">Ayo buat belajar jadi menyenangkan!</p>
+</div>
+</div>
+</div>
+<!-- Login Card -->
+<div class="w-full max-w-[480px] glass-panel rounded-2xl p-container-padding flex flex-col">
+<div class="flex flex-col items-center mb-8">
+<img alt="Digikidz Logo" class="h-16 md:h-20 mb-6 drop-shadow-sm" data-alt="Official Digikidz Technology for Creative Kids logo featuring playful blue and red typography on a yellow trapezoid background. The design is bold, energetic, and child-friendly, reflecting a modern educational brand. The logo is high-resolution with crisp edges against a white backdrop blur." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIimhuVvrkr1iUkMNEAP2vFOWGBsp3RY4u4NFPzO3Lu5-lJMorLWdL_iYaL2xbTKsDMEUVieBvGmvjoqxUZZwaj0juBj_-fgKseP3BpK-lZmas346NT9keEYb68EVgqIUkXbBQ7rM61i0mmfyLJV0RvTUAQoihF4Cs9IiePseS5Jy6gNcMbbkMc47aFrrpxHeP_5x7_7-_mkF8riPaNqI1nInrc-IfyOVdqz9_Mb2dJCudv0Ud81zAsCXxyW1o_rKCQaAr2-m5pRU"/>
+<h2 class="font-headline-md text-headline-md text-center">Masuk sebagai Coach</h2>
+<p class="font-label-sm text-label-sm text-outline mt-1">Gunakan akun resmi Digikidz Anda</p>
+</div>
+<!-- Form Fields -->
+<form class="space-y-6" onsubmit="return false">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block" for="email">Email Coach</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">alternate_email</span>
+<input class="w-full pl-12 pr-4 py-3 bg-white/50 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all font-body-md text-body-md outline-none" id="email" name="email" placeholder="coach@digikidz.id" type="email"/>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="font-label-md text-label-md text-on-surface-variant" for="password">Kata Sandi</label>
+<a class="text-primary hover:underline font-label-sm text-label-sm" href="#">Lupa sandi?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
+<input class="w-full pl-12 pr-12 py-3 bg-white/50 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all font-body-md text-body-md outline-none" id="password" name="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-2">
+<input class="w-4 h-4 text-primary border-outline rounded focus:ring-primary" id="remember" type="checkbox"/>
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="remember">Tetap masuk selama 30 hari</label>
+</div>
+<button class="w-full py-4 bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all btn-premium-shine flex justify-center items-center gap-2" type="submit">
+<span>Masuk ke Portal</span>
+<span class="material-symbols-outlined">rocket_launch</span>
+</button>
+</form>
+<div class="mt-8 pt-8 border-t border-outline-variant/30 text-center">
+<p class="font-body-md text-body-md text-outline">
+                        Belum punya akun? <a class="text-primary font-bold hover:underline" href="#">Hubungi Admin</a>
+</p>
+</div>
+</div>
+<!-- Mobile Mascot (Visible only on mobile, smaller) -->
+<div class="md:hidden mt-8 flex flex-col items-center">
+<img alt="Mascot Digikidz Mobile" class="w-32 floating-mascot" data-alt="A friendly, energetic cartoon mascot for a children's technology learning center. The mascot is a cute, high-tech robot child wearing a blue space suit with yellow boots and gloves, jumping joyfully in the air with a large smile. The art style is clean vector with bold outlines and vibrant primary colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwUg7q9oXSD9UnVVpdxjwiDleK1xohLxUnGZke_dXK91qXe72lVikGRMJcQrx2cIczyOzUaFEYkzS0FYDH_CWGjsJfmOqjKQmogpC71iOytFX-79befwPrFMg9LYWsb_iUI_uGK4flNkSmDOuIgFKuQ1UIkGdEwkizdfvNFk4RsL1zKRNBgkv6iITKgWmpmqO9W8Ha1io2lK0IUDL8tu3ZMYcfngAHnjEa1F5F2MTEFA9_FwJEckhdtJk5t-t9ypcjEUgMwt66Buo"/>
+<p class="mt-4 font-headline-lg-mobile text-headline-lg-mobile text-primary text-center">Ayo Mulai, Coach!</p>
+</div>
+</div>
+</main>
+<!-- Footer Component as requested in Predicted List -->
+<footer class="w-full py-8 px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 border-t border-outline-variant/30 bg-surface">
+<div class="flex items-center gap-2">
+<span class="text-label-md font-bold text-primary">Digikidz Coaches</span>
+<span class="text-outline-variant">|</span>
+<p class="text-label-sm font-label-sm text-outline">© 2024 Digikidz Technology for Creative Kids. All rights reserved.</p>
+</div>
+<div class="flex gap-6">
+<a class="text-label-sm font-label-sm text-outline hover:text-primary transition-all" href="#">Privacy Policy</a>
+<a class="text-label-sm font-label-sm text-outline hover:text-primary transition-all" href="#">Terms of Service</a>
+<a class="text-label-sm font-label-sm text-outline hover:text-primary transition-all" href="#">Help Center</a>
+</div>
+</footer>
+<script>
+        // Micro-interactions for input focus effects
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.querySelector('.material-symbols-outlined').style.color = '#004ac6';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.querySelector('.material-symbols-outlined').style.color = '#737686';
+            });
+        });
+
+        // Simple password toggle logic
+        const togglePass = document.querySelector('button[type="button"]');
+        const passInput = document.querySelector('input[type="password"]');
+        if (togglePass && passInput) {
+            togglePass.addEventListener('click', () => {
+                const isPass = passInput.getAttribute('type') === 'password';
+                passInput.setAttribute('type', isPass ? 'text' : 'password');
+                togglePass.querySelector('span').innerText = isPass ? 'visibility_off' : 'visibility';
+            });
+        }
+    </script>
+</body></html>

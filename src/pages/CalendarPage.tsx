@@ -1,293 +1,327 @@
-import { useState, useMemo } from 'react';
-import { Header } from '@/components/Header';
-import { useHolidays, Holiday } from '@/hooks/useHolidays';
-import { Calendar } from '@/components/ui/calendar';
-import { Badge } from '@/components/ui/badge';
+import { useState, useCallback } from 'react';
+import { LiveDateTime } from '@/components/LiveDateTime';
+
+import { useSchedule } from '@/hooks/useSchedule';
+import { ScheduleGrid } from '@/components/ScheduleGrid';
+import { ScheduleDialog } from '@/components/ScheduleDialog';
+import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
+import { ScheduleEntry, DayOfWeek, TimeSlot, Coach, COACHES } from '@/types/schedule';
+import { X, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, CalendarDays, Loader2, AlertCircle, CalendarCheck } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-const BULAN = [
-  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-];
-
-function formatTanggal(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00');
-  const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu'];
-  return `${hari[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
-}
+import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/hooks/useAuth';
+import { getDisplayName } from '@/lib/displayNames';
 
 export default function CalendarPage() {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const [year, setYear] = useState(currentYear);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(now);
-  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), 1));
+  const { schedule, loading: scheduleLoading, addEntry, updateEntry, deleteEntry, getEntriesForCell } = useSchedule();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const displayedCoachName = user?.user_metadata?.full_name || getDisplayName(user?.email || '') || 'Coach';
 
-  const { holidays, loading, error } = useHolidays(year);
+  const [filterCoach, setFilterCoach] = useState<Coach | 'all'>('all');
+  const [filterLevel, setFilterLevel] = useState<string>('all');
+  const [filterActive, setFilterActive] = useState<boolean>(true);
 
-  const getHolidaysForDate = (date: Date): Holiday[] => {
-    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    return holidays.filter((h) => h.date === dateStr);
+  const filteredGetEntriesForCell = useCallback(
+    (day: DayOfWeek, time: TimeSlot) => {
+      return getEntriesForCell(day, time).filter((entry) => {
+        const matchCoach = filterCoach === 'all' || entry.coach === filterCoach;
+        const matchLevel =
+          filterLevel === 'all' ||
+          (filterLevel === 'Little Creator' && entry.level.startsWith('Little Creator')) ||
+          (filterLevel === 'Junior' && entry.level.startsWith('Junior')) ||
+          (filterLevel === 'Teenager' && entry.level.startsWith('Teenager'));
+        const matchActive = !filterActive || entry.isActive;
+        return matchCoach && matchLevel && matchActive;
+      });
+    },
+    [getEntriesForCell, filterCoach, filterLevel, filterActive]
+  );
+
+  const hasActiveFilter = filterCoach !== 'all' || filterLevel !== 'all' || !filterActive;
+
+  const clearFilters = () => {
+    setFilterCoach('all');
+    setFilterLevel('all');
+    setFilterActive(true);
   };
 
-  const selectedHolidays = selectedDate ? getHolidaysForDate(selectedDate) : [];
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<ScheduleEntry | null>(null);
+  const [defaultDay, setDefaultDay] = useState<DayOfWeek>('senin');
+  const [defaultTime, setDefaultTime] = useState<TimeSlot>('08:00');
 
-  const holidaysByMonth = useMemo(() => {
-    const grouped: Record<number, Holiday[]> = {};
-    holidays.forEach((h) => {
-      const month = new Date(h.date + 'T00:00:00').getMonth();
-      if (!grouped[month]) grouped[month] = [];
-      grouped[month].push(h);
-    });
-    return grouped;
-  }, [holidays]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingEntry, setDeletingEntry] = useState<ScheduleEntry | null>(null);
 
-  const handleYearChange = (delta: number) => {
-    const newYear = year + delta;
-    setYear(newYear);
-    setCalendarMonth(new Date(newYear, calendarMonth.getMonth(), 1));
-    setSelectedDate(undefined);
+  const handleAddClick = (day: DayOfWeek, time: TimeSlot) => {
+    setEditingEntry(null);
+    setDefaultDay(day);
+    setDefaultTime(time);
+    setDialogOpen(true);
   };
 
-  const holidayDates = useMemo(() => {
-    return holidays.map((h) => new Date(h.date + 'T00:00:00'));
-  }, [holidays]);
+  const handleEditClick = (entry: ScheduleEntry) => {
+    const existing = schedule.find(e => e.id === entry.id);
+    if (existing && existing.isActive !== entry.isActive) {
+      updateEntry(entry.id, { isActive: entry.isActive, updatedBy: displayedCoachName });
+      toast({
+        title: entry.isActive ? 'Murid Diaktifkan' : 'Murid Dinonaktifkan',
+        description: `${entry.studentName} kini berstatus ${entry.isActive ? 'Aktif' : 'Nonaktif'}.`,
+      });
+      return;
+    }
+    setEditingEntry(entry);
+    setDialogOpen(true);
+  };
+
+  const handleDeleteClick = (id: string) => {
+    const entry = schedule.find((e) => e.id === id);
+    if (entry) {
+      setDeletingEntry(entry);
+      setDeleteDialogOpen(true);
+    }
+  };
+
+  const handleSave = (data: Omit<ScheduleEntry, 'id'>) => {
+    const adminName = displayedCoachName;
+    const auditData = { ...data, updatedBy: adminName };
+    if (editingEntry) {
+      updateEntry(editingEntry.id, auditData);
+      toast({ title: 'Berhasil!', description: `Jadwal ${data.studentName} berhasil diperbarui oleh ${adminName}.` });
+    } else {
+      addEntry(auditData);
+      toast({ title: 'Berhasil!', description: `Jadwal ${data.studentName} berhasil ditambahkan oleh ${adminName}.` });
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (deletingEntry) {
+      deleteEntry(deletingEntry.id);
+      toast({ title: 'Dihapus', description: `Jadwal ${deletingEntry.studentName} berhasil dihapus.`, variant: 'destructive' });
+      setDeletingEntry(null);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background/50">
-      <Header />
-
-      <main className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-accent p-6 sm:p-8 mb-8 text-white shadow-xl shadow-primary/20 animate-fade-in">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
-
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="bg-white/20 backdrop-blur-md p-1.5 rounded-lg border border-white/10">
-                  <CalendarDays className="h-4 w-4 text-amber-200" />
-                </div>
-                <span className="text-xs font-bold uppercase tracking-widest text-primary-foreground/80">Kalender Nasional</span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-                Hari Libur <span className="text-amber-200">{year}</span>
-              </h1>
-              <p className="text-primary-foreground/80 text-sm max-w-sm font-medium">
-                Daftar tanggal merah dan hari besar Indonesia. Klik tanggal untuk melihat detail.
-              </p>
-            </div>
-
-            {/* Year Selector */}
-            <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 self-start sm:self-auto">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleYearChange(-1)}
-                className="h-9 w-9 rounded-xl text-white hover:bg-white/20"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </Button>
-              <span className="text-2xl font-black text-white min-w-[72px] text-center">{year}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleYearChange(1)}
-                className="h-9 w-9 rounded-xl text-white hover:bg-white/20"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </Button>
+    <>
+      {/* ── Stitch-style Page Header with mascot ── */}
+      <div
+        className="relative overflow-hidden rounded-2xl mb-6 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4"
+        style={{
+          background: 'rgba(255,255,255,0.8)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.4)',
+          boxShadow: '0 4px 6px rgba(0,74,198,0.05)',
+          padding: '24px',
+        }}
+      >
+        {/* Left: mascot + title */}
+        <div className="flex items-center gap-4 z-10">
+          <img
+            alt="Digikidz Mascot"
+            className="w-16 h-16 object-contain flex-shrink-0"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAt5gIu3jt0lxlDWYuiCgoZdvOnEUL6E-C2fq4zlpaeIzGkz-20vc_EFpzVtnpiU0UQiIlt1nuzvQJTY4UkMQFZmsS-RpMx28zs0enwW_rGaePaE5xMQ02bLShC3DU9MQFr7YSJ3Kuhmt5ASQaGE8X4hF1lMFATnGObtiOgZAEUR1sPoD5ahwPpv5nsdewMt772r8W1uRl20ET0KfuaPnLdnYWDR0KHo2egE4MiPK5Pi1wiJl5Ys3fsAGh-qlAyxTPAfCIEy0DU9ok"
+          />
+          <div>
+            <h1 style={{ fontSize: 28, fontWeight: 800, color: '#191c1e', margin: 0, lineHeight: 1.2 }}>
+              Weekly Schedule
+            </h1>
+            <div className="mt-2">
+              <LiveDateTime />
             </div>
           </div>
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="glass-card rounded-2xl p-16 flex flex-col items-center justify-center gap-4">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-110 animate-pulse" />
-              <Loader2 className="w-10 h-10 animate-spin text-primary relative" />
-            </div>
-            <p className="text-sm font-bold text-muted-foreground animate-pulse">Memuat data hari libur...</p>
+        {/* Right: filters + add button */}
+        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto z-10">
+          {/* Coach filter */}
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border"
+            style={{ background: '#fff', borderColor: '#c3c6d7', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#434655' }}>person</span>
+            <Select value={filterCoach} onValueChange={(v) => setFilterCoach(v as Coach | 'all')}>
+              <SelectTrigger className="border-none bg-transparent shadow-none focus:ring-0 h-auto p-0 text-sm font-semibold text-gray-700 min-w-[100px]">
+                <SelectValue placeholder="Coach" />
+              </SelectTrigger>
+              <SelectContent className="z-50">
+                <SelectItem value="all">Semua Coach</SelectItem>
+                {COACHES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
-        )}
 
-        {/* Error State */}
-        {error && (
-          <div className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center gap-3 text-center">
-            <div className="bg-destructive/10 p-4 rounded-2xl">
-              <AlertCircle className="w-8 h-8 text-destructive" />
-            </div>
-            <p className="font-bold text-foreground">Gagal Memuat Data</p>
-            <p className="text-sm text-muted-foreground">{error}</p>
+          {/* Level filter */}
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border"
+            style={{ background: '#fff', borderColor: '#c3c6d7', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#434655' }}>school</span>
+            <Select value={filterLevel} onValueChange={setFilterLevel}>
+              <SelectTrigger className="border-none bg-transparent shadow-none focus:ring-0 h-auto p-0 text-sm font-semibold text-gray-700 min-w-[100px]">
+                <SelectValue placeholder="Level" />
+              </SelectTrigger>
+              <SelectContent className="z-50">
+                <SelectItem value="all">Semua Level</SelectItem>
+                <SelectItem value="Little Creator">Little Creator</SelectItem>
+                <SelectItem value="Junior">Junior</SelectItem>
+                <SelectItem value="Teenager">Teenager</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
 
-        {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Calendar Widget */}
-            <div className="md:col-span-1 space-y-4">
-
-              <div className="glass-card rounded-2xl p-5 border-none shadow-xl shadow-primary/5">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="bg-primary/10 p-2 rounded-xl">
-                    <CalendarCheck className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm text-foreground">Pilih Tanggal</h3>
-                    <p className="text-xs text-muted-foreground">Klik untuk melihat detail</p>
-                  </div>
-                </div>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  month={calendarMonth}
-                  onMonthChange={setCalendarMonth}
-                  className="p-0 pointer-events-auto"
-                  modifiers={{ holiday: holidayDates }}
-                  modifiersClassNames={{
-                    holiday: 'text-destructive font-black after:content-[""] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-destructive after:rounded-full',
-                  }}
-                />
-              </div>
-
-              {/* Selected Date Detail */}
-              {selectedDate && (
-                <div className={cn(
-                  "glass-card rounded-2xl p-5 border-none shadow-xl animate-fade-in",
-                  selectedHolidays.length > 0 ? "shadow-destructive/10" : "shadow-primary/5"
-                )}>
-                  {selectedHolidays.length > 0 ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="bg-destructive/10 p-2 rounded-xl">
-                          <CalendarDays className="h-4 w-4 text-destructive" />
-                        </div>
-                        <div>
-                          <p className="font-black text-sm text-foreground">Hari Libur</p>
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Tanggal Merah</p>
-                        </div>
-                      </div>
-                      <p className="text-xs font-bold text-muted-foreground">{formatTanggal(selectedHolidays[0].date)}</p>
-                      {selectedHolidays.map((h, i) => (
-                        <p key={i} className="text-sm font-semibold text-foreground">🎉 {h.localName}</p>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-2">
-                      <p className="text-sm text-muted-foreground font-medium">
-                        Bukan hari libur nasional
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Summary Stat */}
-              {!loading && (
-                <div className="glass-card rounded-2xl p-4 border-none shadow-lg shadow-primary/5 flex items-center gap-4">
-                  <div className="bg-primary/10 p-3 rounded-2xl">
-                    <CalendarDays className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-foreground">{holidays.length}</p>
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Hari Libur {year}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Holiday List */}
-            <div className="md:col-span-2">
-
-              <div className="glass-card rounded-2xl p-6 border-none shadow-xl shadow-primary/5">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-destructive/10 p-2 rounded-xl">
-                      <CalendarDays className="h-4 w-4 text-destructive" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-sm text-foreground">Daftar Hari Libur Nasional</h3>
-                      <p className="text-xs text-muted-foreground">Tahun {year}</p>
-                    </div>
-                  </div>
-                  <Badge variant="secondary" className="text-xs font-bold">
-                    {holidays.length} hari
-                  </Badge>
-                </div>
-
-                <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2">
-                  {Object.entries(holidaysByMonth)
-                    .sort(([a], [b]) => Number(a) - Number(b))
-                    .map(([monthIdx, monthHolidays]) => (
-                      <div key={monthIdx}>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                          <h3 className="text-xs font-black text-primary uppercase tracking-widest">
-                            {BULAN[Number(monthIdx)]}
-                          </h3>
-                          <div className="flex-1 h-px bg-border" />
-                          <span className="text-[10px] font-bold text-muted-foreground">{monthHolidays.length} hari</span>
-                        </div>
-                        <div className="space-y-2 ml-5">
-                          {monthHolidays.map((holiday, i) => {
-                            const date = new Date(holiday.date + 'T00:00:00');
-                            const isSelected =
-                              selectedDate &&
-                              selectedDate.toDateString() === date.toDateString();
-                            return (
-                              <button
-                                key={i}
-                                onClick={() => {
-                                  setSelectedDate(date);
-                                  setCalendarMonth(new Date(date.getFullYear(), date.getMonth(), 1));
-                                }}
-                                className={cn(
-                                  'w-full text-left rounded-xl p-3 border transition-all duration-200 hover:shadow-sm group',
-                                  isSelected
-                                    ? 'bg-destructive/10 border-destructive/30 shadow-sm ring-1 ring-destructive/20'
-                                    : 'bg-background/60 border-border/50 hover:bg-card hover:border-border'
-                                )}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <div className={cn(
-                                      "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black transition-colors",
-                                      isSelected ? "bg-destructive text-white" : "bg-destructive/10 text-destructive group-hover:bg-destructive group-hover:text-white"
-                                    )}>
-                                      {date.getDate()}
-                                    </div>
-                                    <div>
-                                      <p className="font-semibold text-sm text-foreground">{holiday.localName}</p>
-                                      <p className="text-xs text-muted-foreground mt-0.5">{formatTanggal(holiday.date)}</p>
-                                    </div>
-                                  </div>
-                                  <Badge
-                                    variant="outline"
-                                    className={cn(
-                                      "text-xs shrink-0",
-                                      isSelected ? "border-destructive/50 text-destructive" : "border-destructive/30 text-destructive"
-                                    )}
-                                  >
-                                    Libur
-                                  </Badge>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
+          {/* Active filter */}
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border"
+            style={{ background: '#fff', borderColor: '#c3c6d7', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+          >
+            {filterActive
+              ? <EyeOff className="h-4 w-4 text-gray-500" />
+              : <Eye className="h-4 w-4 text-blue-600" />
+            }
+            <Select value={filterActive ? 'active' : 'all'} onValueChange={(v) => setFilterActive(v === 'active')}>
+              <SelectTrigger className="border-none bg-transparent shadow-none focus:ring-0 h-auto p-0 text-sm font-semibold text-gray-700 min-w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="z-50">
+                <SelectItem value="active">Sembunyikan Nonaktif</SelectItem>
+                <SelectItem value="all">Tampilkan Semua</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
-      </main>
-    </div>
+
+          {/* Clear filter */}
+          {hasActiveFilter && (
+            <button
+              onClick={clearFilters}
+              title="Reset filter"
+              style={{ background: '#ffdad6', border: 'none', borderRadius: 8, padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            >
+              <X className="h-4 w-4 text-red-700" />
+            </button>
+          )}
+
+          {/* Divider */}
+          <div style={{ width: 1, height: 32, background: '#c3c6d7' }} className="hidden sm:block" />
+
+          {/* Add Button — matches Stitch "New Session" */}
+          <button
+            onClick={() => {
+              setEditingEntry(null);
+              setDefaultDay('senin');
+              setDefaultTime('08:00');
+              setDialogOpen(true);
+            }}
+            className="flex items-center gap-2 rounded-lg"
+            style={{
+              background: '#004ac6',
+              color: '#fff',
+              border: 'none',
+              padding: '10px 18px',
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,74,198,0.3)',
+              transition: 'background 0.2s, transform 0.1s',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#003aab'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#004ac6'; }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
+            Tambah Jadwal
+          </button>
+        </div>
+
+        {/* Decorative orb — matches Stitch */}
+        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: '30%', height: '200%', background: '#dbe1ff', borderRadius: '50%', filter: 'blur(80px)', opacity: 0.4, pointerEvents: 'none', zIndex: 0 }} />
+      </div>
+
+      {/* ── Schedule Grid ── */}
+      {scheduleLoading ? (
+        <div
+          style={{
+            background: 'rgba(255,255,255,0.8)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.4)',
+            borderRadius: 20,
+            padding: 24,
+          }}
+        >
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-xl mb-3" />
+          ))}
+        </div>
+      ) : (
+        <div
+          style={{
+            background: 'rgba(255,255,255,0.7)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.4)',
+            boxShadow: '0 4px 6px rgba(0,74,198,0.05)',
+            borderRadius: 20,
+            overflow: 'hidden',
+          }}
+        >
+          <ScheduleGrid
+            getEntriesForCell={filteredGetEntriesForCell}
+            onAddEntry={handleAddClick}
+            onEditEntry={handleEditClick}
+            onDeleteEntry={handleDeleteClick}
+            hasActiveFilter={hasActiveFilter}
+          />
+        </div>
+      )}
+
+      {/* ── Legend — matches Stitch footer ── */}
+      <div
+        className="mt-5 flex flex-wrap items-center gap-6"
+        style={{
+          background: 'rgba(255,255,255,0.8)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.4)',
+          borderRadius: 16,
+          padding: '14px 20px',
+        }}
+      >
+        <span style={{ fontSize: 11, fontWeight: 700, color: '#737686', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          Coach Legend:
+        </span>
+        <div className="flex items-center gap-2">
+          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#3b82f6', border: '2px solid #2563eb' }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#434655' }}>Mr. Bani</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#a855f7', border: '2px solid #9333ea' }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#434655' }}>Mr. Argy</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ec4899', border: '2px solid #db2777' }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#434655' }}>Ms. Zaura</span>
+        </div>
+        <div style={{ width: 1, height: 20, background: '#c3c6d7' }} />
+        <span style={{ fontSize: 12, fontWeight: 700, padding: '2px 10px', borderRadius: 6, background: '#e8fce8', color: '#006229' }}>Little Creator</span>
+        <span style={{ fontSize: 12, fontWeight: 700, padding: '2px 10px', borderRadius: 6, background: '#dbe1ff', color: '#004ac6' }}>Junior</span>
+        <span style={{ fontSize: 12, fontWeight: 700, padding: '2px 10px', borderRadius: 6, background: '#ffdbca', color: '#9d4300' }}>Teenager</span>
+      </div>
+
+      <ScheduleDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        entry={editingEntry}
+        defaultDay={defaultDay}
+        defaultTime={defaultTime}
+        onSave={handleSave}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleConfirmDelete}
+        studentName={deletingEntry?.studentName}
+      />
+    </>
   );
 }

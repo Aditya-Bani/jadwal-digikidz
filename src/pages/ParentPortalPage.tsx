@@ -57,132 +57,118 @@ export default function ParentPortalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-      </div>
-
-      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center relative z-10 animate-fade-in">
+    <div className="text-[#191c1e] min-h-screen relative antialiased selection:bg-[#2563eb] selection:text-white transition-colors duration-300 font-sans flex flex-col items-center justify-between p-4" style={{ background: 'radial-gradient(circle at top right, #dbe1ff 0%, #f7f9fb 60%)' }}>
+      <style>
+        {`
+          .glass-panel {
+              background: rgba(255, 255, 255, 0.8);
+              backdrop-filter: blur(20px);
+              -webkit-backdrop-filter: blur(20px);
+              border: 1px solid rgba(255, 255, 255, 0.4);
+          }
+          .bounce-in {
+              animation: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+          }
+          @keyframes bounceIn {
+              0% { transform: scale(0.3); opacity: 0; }
+              50% { transform: scale(1.05); opacity: 1; }
+              70% { transform: scale(0.9); }
+              100% { transform: scale(1); }
+          }
+        `}
+      </style>
+      
+      <main className="w-full max-w-md flex flex-col items-center gap-8 py-8 z-10">
+        
+        {/* Notifications banner */}
         {parentNotifications.length > 0 && (
-          <div className="col-span-1 lg:col-span-2 mb-2 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-4 sm:p-5 flex items-start sm:items-center gap-4 shadow-sm animate-fade-in">
-            <div className="bg-amber-100 dark:bg-amber-900/30 p-2 sm:p-3 rounded-xl shrink-0">
-              <Megaphone className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-500" />
-            </div>
-            <div className="flex-1 space-y-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500">Pemberitahuan</p>
-              <div className="text-sm font-semibold text-amber-900 dark:text-amber-200 leading-relaxed">
-                {parentNotifications.map((msg, idx) => (
-                  <p key={idx}>{msg}</p>
-                ))}
-              </div>
+          <div className="w-full bg-[#fff7e6] border border-[#fd761a] rounded-xl p-3 md:p-4 flex gap-3 items-start text-left shadow-sm">
+            <span className="material-symbols-outlined text-[#fd761a] shrink-0">campaign</span>
+            <div>
+              <p className="text-[11px] font-bold text-[#9d4300] uppercase tracking-wider mb-1">Pemberitahuan</p>
+              {parentNotifications.map((msg, idx) => (
+                <p key={idx} className="text-[13px] text-[#5c2400]">{msg}</p>
+              ))}
             </div>
           </div>
         )}
 
-        <div className="hidden lg:flex flex-col items-center justify-center text-center lg:text-left lg:items-start space-y-6">
-          <img src={logodk} alt="DIGIKIDZ" className="h-16 w-auto mb-4" />
-          <div className="space-y-4">
-            <h1 className="text-4xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight">
-              Parent <br /> <span className="text-primary italic">Portal.</span>
-            </h1>
-            <p className="text-lg text-muted-foreground font-medium max-w-sm">
-              Lihat perkembangan kreativitas buah hati Anda melalui Activity Report eksklusif dari Digikidz.
+        {/* Header Section */}
+        <header className="flex flex-col items-center text-center gap-4">
+          <div className="w-48 h-auto">
+            <img alt="Digikidz Logo" className="w-full h-auto object-contain" src={logodk} />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#004ac6]">Welcome Parents</h1>
+            <p className="text-base text-[#434655] max-w-[280px] mx-auto font-medium">
+              Enter your unique access code to view your child's progress.
             </p>
           </div>
+        </header>
 
-          <div className="relative pt-10">
-            <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full scale-75 animate-pulse" />
-            <img
-              src={mascotParent}
-              alt="Mascot Parent"
-              className="relative h-64 object-contain drop-shadow-2xl animate-bounce-subtle"
-            />
-          </div>
+        {/* Mascot Image */}
+        <div className="w-48 md:w-56 bounce-in">
+          <img alt="Cheerful Digikidz Mascot" className="w-full h-auto drop-shadow-xl" src={mascotParent} />
         </div>
 
-        <div className="flex flex-col items-center">
-          <div className="lg:hidden mb-10 text-center flex flex-col items-center">
-            <img src={logodk} alt="DIGIKIDZ" className="h-12 mb-6" />
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-75 animate-pulse" />
-              <img src={mascotParent} alt="Mascot Parent" className="relative h-32 object-contain drop-shadow-xl animate-bounce-subtle" />
-            </div>
-            <h2 className="text-3xl font-black text-foreground tracking-tight">Parent Portal</h2>
-          </div>
-
-          <div className="glass-card w-full max-w-md p-8 sm:p-10 rounded-[2.5rem] border-none shadow-2xl shadow-primary/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-4 -translate-y-4">
-              <KeyRound className="w-32 h-32" />
-            </div>
-
-            <div className="relative z-10 space-y-8">
-              <div className="text-center space-y-2">
-                <h3 className="text-xl font-bold">Akses Laporan Murid</h3>
-                <p className="text-sm text-muted-foreground font-medium">
-                  Masukkan 6 digit kode unik yang diberikan oleh Coach
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Access Code</Label>
-                  <Input
-                    value={code}
-                    onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(''); }}
-                    placeholder="XXXXXX"
-                    className="h-16 rounded-2xl border-none bg-muted/50 text-center text-3xl font-black tracking-[0.5em] focus-visible:ring-primary shadow-inner"
-                    maxLength={6}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSubmitCode()}
-                  />
-                </div>
-
-                {error && (
-                  <div className="bg-destructive/10 text-destructive text-xs font-bold p-3 rounded-xl text-center border border-destructive/20 animate-shake">
-                    {error}
-                  </div>
-                )}
-
-                <Button
-                  onClick={handleSubmitCode}
-                  className="w-full h-14 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all group"
-                  size="lg"
-                  disabled={loadingCode || code.length < 6}
-                >
-                  {loadingCode ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>
-                      <KeyRound className="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform" />
-                      Masuk Portal
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              <div className="pt-6 border-t border-border/50 text-center">
-                <p className="text-xs text-muted-foreground font-medium">
-                  Belum punya kode? <a
-                    href="https://wa.me/6285169991918?text=Halo%20Education%20Center%20Digikidz%2C%20saya%20adalah%20orang%20tua%20murid.%20Boleh%20saya%20minta%20kode%20akses%20untuk%20melihat%20Activity%20Report%20anak%20saya%20di%20Parent%20Portal%3F%20Terima%20kasih."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary font-bold cursor-pointer hover:underline"
-                  >
-                    Hubungi Education Center
-                  </a>
-                </p>
+        {/* Login Card */}
+        <div className="glass-panel w-full rounded-xl p-8 shadow-lg shadow-[#004ac6]/5">
+          <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmitCode(); }}>
+            <div className="space-y-2 relative">
+              <label className="text-sm font-semibold text-[#434655] block ml-1" htmlFor="access-code">
+                  Access Code
+              </label>
+              <div className="relative group">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#737686] group-focus-within:text-[#004ac6] transition-colors">
+                    lock
+                </span>
+                <input 
+                  className="w-full h-14 pl-12 pr-4 bg-white/50 border border-[#c3c6d7] rounded-lg focus:ring-2 focus:ring-[#004ac6] focus:border-[#004ac6] transition-all text-base outline-none uppercase placeholder:normal-case placeholder:text-[#c3c6d7]" 
+                  id="access-code" 
+                  placeholder="Enter PIN (e.g. 12345)" 
+                  required 
+                  type="password"
+                  maxLength={6}
+                  value={code}
+                  onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(''); }}
+                />
               </div>
             </div>
-          </div>
+
+            {/* Error */}
+            {error && (
+              <div className="w-full bg-[#fff0f0] border border-[#ffdad6] rounded-lg p-3 text-[13px] font-semibold text-[#ba1a1a]">
+                {error}
+              </div>
+            )}
+
+            <button 
+              className="w-full h-14 bg-[#004ac6] hover:bg-[#2563eb] disabled:bg-[#b4c5ff] disabled:cursor-not-allowed text-white font-semibold text-sm rounded-lg flex items-center justify-center gap-2 shadow-md shadow-[#004ac6]/20 active:scale-95 transition-all duration-150" 
+              type="submit"
+              disabled={loadingCode || code.length < 6}
+            >
+              {loadingCode ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                <>
+                  Access Portal
+                  <span className="material-symbols-outlined">arrow_forward</span>
+                </>
+              )}
+            </button>
+          </form>
         </div>
-      </div>
+      </main>
 
-      <p className="fixed bottom-8 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/50 pointer-events-none">
-        School Of Technology • Digikidz Indonesia
-      </p>
+      {/* Footer Help */}
+      <footer className="mt-auto pb-6 z-10">
+        <a className="text-sm font-semibold text-[#004ac6] hover:text-[#25D366] hover:underline transition-all flex items-center gap-1" href={`https://wa.me/6285169991918?text=${encodeURIComponent('Halo Education Consultant, saya ingin bertanya/konfirmasi mengenai laporan aktivitas anak saya yang belum diupload.')}`} target="_blank" rel="noopener noreferrer">
+            Need help? Contact Support
+        </a>
+      </footer>
     </div>
   );
 }
+
+
 
 function ParentReportView({ studentName, accessCode, onBack }: { studentName: string; accessCode: string; onBack: () => void }) {
   const { reports, loading } = useActivityReports(studentName, accessCode);
@@ -199,17 +185,17 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
   const [activityFilterMedia, setActivityFilterMedia] = useState<'all' | 'photo' | 'video'>('all');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
-  const { levels, trialReport } = groupReportsByLevel(reports);
+  const programRaw = reports[0]?.level || '';
+  const programName = programRaw.includes(' - ') ? programRaw.split(' - ')[0] : programRaw;
+  const maxLevel = getProgramLimit(programName);
+
+  const { levels, trialReport } = groupReportsByLevel(reports, maxLevel);
   const { activeNotifications } = useNotifications();
 
   // Filter only notifications meant for parents
   const parentNotifications = activeNotifications
     .filter(n => n.message.startsWith('[PARENT]'))
     .map(n => n.message.replace(/^\[PARENT\]\s*/, ''));
-
-  const programRaw = reports[0]?.level || '';
-  const programName = programRaw.includes(' - ') ? programRaw.split(' - ')[0] : programRaw;
-  const maxLevel = getProgramLimit(programName);
 
   const getCertForLevel = (levelNumber: number) => {
     return certificates.find(cert => {
@@ -254,8 +240,8 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
 
   const allReportWeeks = Array.from(new Set(reports.map(r => r.lessonWeek))).sort((a, b) => a - b);
   const filteredActivityReports = reports.filter((report) => {
-    const levelFromReport = report.level.match(/\d+/)?.[0] || '';
-    const matchesLevel = activityFilterLevel === 'all' || levelFromReport === activityFilterLevel;
+    const calculatedLevel = Math.max(1, Math.ceil(report.lessonWeek / 16));
+    const matchesLevel = activityFilterLevel === 'all' || String(calculatedLevel) === activityFilterLevel;
     const matchesWeek = activityFilterWeek === 'all' || String(report.lessonWeek) === activityFilterWeek;
 
     const hasVideo = report.mediaUrls.some((url) => /\.(mov|mp4|webm|ogg)$/i.test(url));
@@ -271,9 +257,8 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
   const activeActivityFilterCount = [activityFilterLevel !== 'all', activityFilterWeek !== 'all', activityFilterMedia !== 'all'].filter(Boolean).length;
 
   const handleOpenFilteredActivity = (report: ActivityReport) => {
-    const levelMatch = report.level.match(/\d+/);
-    const parsedLevel = levelMatch ? parseInt(levelMatch[0], 10) : null;
-    if (parsedLevel) setSelectedLevel(parsedLevel);
+    const parsedLevel = Math.max(1, Math.ceil(report.lessonWeek / 16));
+    setSelectedLevel(parsedLevel);
     setSelectedReport(report);
     setViewMode('player');
   };
@@ -284,7 +269,6 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
 
   return (
     <>
-      <PortalHeader studentName={studentName} onLogout={onBack} />
       {banner && <HolidayBannerPopup banner={banner} />}
       
       {viewMode === 'dashboard' ? (
@@ -309,6 +293,7 @@ function ParentReportView({ studentName, accessCode, onBack }: { studentName: st
           hasActiveActivityFilter={hasActiveActivityFilter}
           activeActivityFilterCount={activeActivityFilterCount}
           onOpenReport={handleOpenFilteredActivity}
+          onLogout={onBack}
         />
       ) : (
         <ActivityReportPlayer

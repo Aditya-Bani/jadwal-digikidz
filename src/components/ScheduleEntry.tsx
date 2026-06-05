@@ -33,31 +33,26 @@ export function ScheduleEntryCard({ entry, onEdit, onDelete }: ScheduleEntryProp
   const inactiveClass = isInactive ? 'opacity-40 grayscale hover:opacity-80 transition-opacity' : '';
 
   return (
-    <div className={cn('schedule-entry group relative border shadow-sm/50 p-2.5 rounded-xl transition-all duration-300', coachClass, inactiveClass, pendingClass)}>
-      {isPending && (
-        <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-[9px] px-2 py-1 rounded-full font-bold shadow-sm z-10 uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap">
-          <span className="opacity-70">Pending</span>
-          {entry.inactiveReason && (
-            <>
-              <div className="w-px h-2 bg-white/30" />
-              <span>{entry.inactiveReason}</span>
-            </>
-          )}
-        </div>
-      )}
-      {isInactive && (
-        <div className="absolute -top-2 -right-2 bg-slate-500 text-white text-[9px] px-2 py-1 rounded-full font-bold shadow-sm z-10 uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap">
-          <span className="opacity-70">Nonaktif</span>
-          {entry.inactiveReason && (
-            <>
-              <div className="w-px h-2 bg-white/30" />
-              <span>{entry.inactiveReason}</span>
-            </>
-          )}
-        </div>
-      )}
+    <div className={cn('schedule-entry group relative border shadow-sm/50 p-3 rounded-xl transition-all duration-300', coachClass, inactiveClass, pendingClass)}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
+          {/* Status Badges */}
+          {(isPending || isInactive) && (
+            <div className="mb-2 flex flex-wrap">
+              <div className={cn(
+                "inline-flex items-center gap-1.5 text-[9px] px-2 py-1 rounded-full font-bold shadow-sm uppercase tracking-widest",
+                isPending ? "bg-amber-500 text-white" : "bg-slate-500 text-white"
+              )}>
+                <span className="opacity-70">{isPending ? "Pending" : "Nonaktif"}</span>
+                {entry.inactiveReason && (
+                  <>
+                    <div className="w-px h-2 bg-white/30 shrink-0" />
+                    <span className="truncate max-w-[140px]">{entry.inactiveReason}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
           <p className={cn("font-bold text-foreground truncate text-sm tracking-tight", isInactive && "line-through opacity-70")}>{entry.studentName}</p>
           <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest mt-0.5">{entry.coach}</p>
           <div className="mt-2 text-left">
